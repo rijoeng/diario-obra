@@ -1,0 +1,1777 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Diário de Obra Rijo</title>
+<meta name="description" content="Lançamento do diário de obra pelo celular, com ou sem sinal. Integra com a Vobi.">
+<meta name="theme-color" content="#0F3D2E">
+<!--PWA-->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Diário Obra">
+<script src="config.js"></script>
+<!--/PWA-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: mesma linguagem dos sistemas Rijo (APIs Vobi 01–04): barra institucional verde com a logomarca negativa
+   e as etapas como abas; coluna única para uso com uma mão na obra; ação principal sempre no rodapé,
+   ao alcance do polegar; alvos de toque grandes e contraste alto para uso no sol. */
+:root {
+  --verde: #0F3D2E; --verde-2: #3A8F5C; --verde-3: #E3EFE7; --verde-tinta: #1D5C43;
+  --fundo: #F2F4F3; --papel: #FFFFFF; --papel-2: #F6F8F7; --linha: #DCE3DF; --linha-forte: #C3CEC8;
+  --texto: #1B2A24; --texto-2: #566761; --texto-3: #748580;
+  --rec: #2F8552; --ok-fundo: #E3EFE7;
+  --cli: #A36A12; --cli-fundo: #F6ECD9;
+  --venc: #A9432D; --venc-fundo: #F7E7E3;
+  --fun: #2F5E8C; --fun-fundo: #E4EDF6;
+  --topo: #0F3D2E; --topo-texto: #FFFFFF; --topo-2: #B9D3C4; --topo-acento: #8CCBA5;
+  --pri-texto: #FFFFFF;
+  --sombra: 0 1px 2px rgba(15, 61, 46, .06);
+  --sombra-2: 0 1px 2px rgba(15, 61, 46, .05), 0 6px 20px rgba(15, 61, 46, .06);
+  --fonte: "Barlow", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --fonte-cond: "Barlow Semi Condensed", "Barlow", "Arial Narrow", system-ui, sans-serif;
+  --fonte-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --raio: 12px;
+  --tap: 48px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --verde: #8CCBA5; --verde-2: #5DB283; --verde-3: #1F332A; --verde-tinta: #A6D9BA;
+    --fundo: #121A17; --papel: #18231F; --papel-2: #1D2925; --linha: #2A3934; --linha-forte: #3A4B45;
+    --texto: #E4ECE8; --texto-2: #A7B6B0; --texto-3: #8A9A94;
+    --rec: #5DB283; --ok-fundo: #1F332A; --cli: #D8B25E; --cli-fundo: #352D1B;
+    --venc: #E08A72; --venc-fundo: #3A2520; --fun: #8DB6E0; --fun-fundo: #1E2C3A;
+    --topo: #0B2A20; --topo-texto: #E4ECE8; --topo-2: #8FB9A1; --topo-acento: #8CCBA5;
+    --pri-texto: #0B1A14; --sombra: none; --sombra-2: none; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --verde: #8CCBA5; --verde-2: #5DB283; --verde-3: #1F332A; --verde-tinta: #A6D9BA;
+  --fundo: #121A17; --papel: #18231F; --papel-2: #1D2925; --linha: #2A3934; --linha-forte: #3A4B45;
+  --texto: #E4ECE8; --texto-2: #A7B6B0; --texto-3: #8A9A94;
+  --rec: #5DB283; --ok-fundo: #1F332A; --cli: #D8B25E; --cli-fundo: #352D1B;
+  --venc: #E08A72; --venc-fundo: #3A2520; --fun: #8DB6E0; --fun-fundo: #1E2C3A;
+  --topo: #0B2A20; --topo-texto: #E4ECE8; --topo-2: #8FB9A1; --topo-acento: #8CCBA5;
+  --pri-texto: #0B1A14; --sombra: none; --sombra-2: none; color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { min-height: 100%; }
+html { background: var(--fundo); }
+body {
+  margin: 0; background: var(--fundo); color: var(--texto); font-family: var(--fonte); font-size: 16px; line-height: 1.45;
+  -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--verde-2); outline-offset: 2px; border-radius: 4px; }
+[hidden] { display: none !important; }
+img { max-width: 100%; }
+h1, h2, h3 { text-wrap: balance; }
+
+/* ---------- barra institucional ---------- */
+.topo {
+  position: sticky; top: 0; z-index: 20; background: var(--topo); color: var(--topo-texto);
+  padding: calc(env(safe-area-inset-top, 0px) + 8px) 16px 0; box-shadow: 0 6px 18px rgba(8, 30, 22, .18);
+}
+.topo-in { display: flex; align-items: center; gap: 10px; min-height: 52px; padding-bottom: 8px; }
+.logo { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
+.logo img { height: 34px; width: auto; display: block; flex: none; }
+.logo-div { width: 1px; height: 26px; background: rgba(255, 255, 255, .24); flex: none; }
+.logo-txt { font-family: var(--fonte-cond); font-weight: 500; font-size: 14px; letter-spacing: .1em; text-transform: uppercase; color: var(--topo-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topo h1 { font-family: var(--fonte-cond); font-weight: 700; font-size: 22px; margin: 0; line-height: 1.1; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topo h1 small { display: block; font-family: var(--fonte); font-weight: 500; font-size: 13px; color: var(--topo-2); overflow: hidden; text-overflow: ellipsis; }
+.btn-icone { width: 44px; height: 44px; border: 0; border-radius: 10px; background: transparent; color: inherit; display: grid; place-items: center; flex: none; }
+.btn-icone:active { background: rgba(255, 255, 255, .12); }
+.pilula {
+  display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 11px; border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, .22); background: rgba(255, 255, 255, .06); color: var(--topo-texto);
+  font-size: 13px; font-weight: 500; white-space: nowrap; flex: none; max-width: 52vw; overflow: hidden; text-overflow: ellipsis;
+}
+.pilula .ponto { width: 8px; height: 8px; border-radius: 50%; background: #6CC08B; flex: none; }
+.pilula.off .ponto { background: #E3A04F; }
+.pilula.sync .ponto { animation: pulsa 1s infinite alternate; }
+@keyframes pulsa { to { opacity: .25; } }
+
+/* etapas como abas da barra (mesma navegação dos sistemas Rijo) */
+.passos { display: flex; gap: 2px; overflow-x: auto; margin: 0 -16px; padding: 0 12px; scrollbar-width: none; }
+.passos::-webkit-scrollbar { display: none; }
+.passo {
+  position: relative; flex: none; border: 0; border-radius: 8px 8px 0 0; background: none; color: var(--topo-2);
+  padding: 9px 12px 12px; font-weight: 500; font-size: 14.5px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.passo[aria-current="step"] { color: var(--topo-texto); background: rgba(255, 255, 255, .1); font-weight: 600; }
+.passo[aria-current="step"]::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: 0; height: 3px; border-radius: 3px 3px 0 0; background: var(--topo-acento); }
+.passo .feito { width: 16px; height: 16px; border-radius: 50%; background: var(--topo-acento); color: #0B2A20; display: grid; place-items: center; }
+
+/* ---------- conteúdo ---------- */
+main { padding: 18px 16px calc(112px + env(safe-area-inset-bottom, 0px)); max-width: 680px; margin: 0 auto; display: grid; gap: 14px; }
+.saudacao { display: grid; gap: 2px; }
+.saudacao b { font-family: var(--fonte-cond); font-size: 28px; font-weight: 700; line-height: 1.1; }
+.saudacao span { color: var(--texto-2); font-size: 15px; }
+.cartao { background: var(--papel); border: 1px solid var(--linha); border-radius: var(--raio); box-shadow: var(--sombra); padding: 16px; display: grid; gap: 12px; min-width: 0; }
+.cartao h2 { margin: 0; font-family: var(--fonte-cond); font-weight: 600; font-size: 20px; line-height: 1.2; }
+.cartao h3 { margin: 0; font-size: 15px; font-weight: 600; }
+.rotulo { font-size: 11.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--texto-3); }
+.obra-cab { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.cod { font-family: var(--fonte-cond); font-weight: 700; font-size: 26px; line-height: 1; color: var(--verde); white-space: nowrap; }
+.cod.p { font-size: 16px; }
+.obra-nome { font-size: 15px; color: var(--texto-2); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.mudo { color: var(--texto-2); font-size: 14px; }
+.linha { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; }
+.linha > .cresce { flex: 1; min-width: 0; }
+.num { font-variant-numeric: tabular-nums; }
+.estado { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; font-weight: 600; font-size: 15px; border: 1px solid var(--linha); border-left-width: 4px; background: var(--papel); text-align: left; width: 100%; }
+.estado svg { flex: none; }
+.estado.ok { border-left-color: var(--verde-2); background: var(--ok-fundo); color: var(--verde-tinta); }
+.estado.warn { border-left-color: var(--cli); background: var(--cli-fundo); color: var(--cli); }
+.estado.bad { border-left-color: var(--venc); background: var(--venc-fundo); color: var(--venc); }
+.estado.info { border-left-color: var(--fun); background: var(--fun-fundo); color: var(--fun); }
+.estado small { display: block; font-weight: 500; font-size: 13px; opacity: .9; }
+
+.btn {
+  min-height: var(--tap); border-radius: 8px; border: 1px solid var(--linha-forte); background: var(--papel); padding: 10px 16px;
+  font-weight: 600; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-align: center;
+}
+.btn:active { transform: translateY(1px); }
+.btn.primario { background: var(--verde-2); border-color: var(--verde-2); color: var(--pri-texto); }
+.btn.sinal { background: var(--verde); border-color: var(--verde); color: var(--pri-texto); }
+.btn.perigo { color: var(--venc); border-color: var(--venc); }
+.btn.cheio { width: 100%; }
+.btn.mini { min-height: 38px; padding: 6px 12px; font-size: 14px; }
+.btn[disabled] { opacity: .45; pointer-events: none; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip {
+  min-height: 40px; border-radius: 20px; border: 1px solid var(--linha-forte); background: var(--papel); padding: 6px 14px;
+  font-size: 15px; font-weight: 500; color: var(--texto-2); display: inline-flex; align-items: center; gap: 6px;
+}
+.chip[aria-pressed="true"] { background: var(--verde-3); border-color: var(--verde-2); color: var(--verde-tinta); font-weight: 600; }
+.chip.falta[aria-pressed="true"] { background: var(--venc-fundo); border-color: var(--venc); color: var(--venc); }
+
+.rodape {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 15; background: var(--papel); border-top: 1px solid var(--linha);
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); display: flex; gap: 10px; justify-content: center;
+  box-shadow: 0 -4px 14px rgba(15, 61, 46, .06);
+}
+.rodape .btn { flex: 1; max-width: 320px; }
+
+/* ---------- clima ---------- */
+.periodo { display: grid; gap: 12px; }
+.periodo-topo { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.periodo-topo h2 { font-size: 22px; }
+.liga { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; min-height: 40px; color: var(--texto-2); }
+.liga input { width: 22px; height: 22px; accent-color: var(--verde-2); }
+.tempos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.tempo {
+  border: 1px solid var(--linha-forte); background: var(--papel-2); border-radius: 10px; padding: 8px 4px; min-height: 76px; color: var(--texto-2);
+  display: grid; justify-items: center; align-content: center; gap: 4px; font-size: 13px; font-weight: 600; line-height: 1.1;
+}
+.tempo[aria-pressed="true"] { border-color: var(--verde-2); background: var(--verde-3); color: var(--verde-tinta); box-shadow: inset 0 0 0 1px var(--verde-2); }
+.condicoes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.condicao { min-height: 44px; border-radius: 10px; border: 1px solid var(--linha-forte); background: var(--papel-2); font-weight: 600; color: var(--texto-2); }
+.condicao[aria-pressed="true"].pra { background: var(--ok-fundo); color: var(--rec); border-color: var(--rec); }
+.condicao[aria-pressed="true"].imp { background: var(--venc-fundo); color: var(--venc); border-color: var(--venc); }
+.periodo.desligado .tempos, .periodo.desligado .condicoes { opacity: .35; pointer-events: none; }
+.sugestao { font-size: 13px; color: var(--texto-3); display: flex; gap: 6px; align-items: center; }
+
+/* ---------- equipe ---------- */
+.efetivo { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--linha); border-radius: 10px; overflow: hidden; }
+.efetivo div { padding: 8px 12px; border-left: 1px solid var(--linha); min-width: 0; }
+.efetivo div:first-child { border-left: 0; }
+.efetivo b { display: block; font-family: var(--fonte-cond); font-size: 30px; font-weight: 600; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.efetivo span { font-size: 13px; color: var(--texto-2); }
+.efetivo .f b { color: var(--venc); }
+.pessoas { display: grid; }
+.pessoa { display: grid; gap: 8px; padding: 12px 0; border-top: 1px solid var(--linha); }
+.pessoa:first-child { border-top: 0; padding-top: 0; }
+.pessoa-topo { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.pessoa-nome { flex: 1; min-width: 0; }
+.pessoa-nome b { display: block; font-size: 16px; font-weight: 600; overflow-wrap: anywhere; }
+.pessoa-nome span { font-size: 13px; color: var(--texto-3); }
+.etq { white-space: nowrap; display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; padding: 1px 7px; border-radius: 10px; background: var(--verde-3); color: var(--verde-tinta); margin-left: 6px; vertical-align: 2px; }
+.etq.nova { background: var(--fun-fundo); color: var(--fun); }
+.etq.aviso { background: var(--cli-fundo); color: var(--cli); }
+.pres { display: inline-grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--linha-forte); border-radius: 8px; overflow: hidden; flex: none; }
+.pres button { border: 0; background: var(--papel-2); min-height: 44px; min-width: 50px; font-weight: 700; font-size: 15px; color: var(--texto-3); }
+.pres button + button { border-left: 1px solid var(--linha-forte); }
+.pres button[aria-pressed="true"].p { background: var(--rec); color: #fff; }
+.pres button[aria-pressed="true"].f { background: var(--venc); color: #fff; }
+.pessoa.saiu .pessoa-nome b { text-decoration: line-through; color: var(--texto-3); }
+.saida-info { font-size: 14px; color: var(--cli); font-weight: 600; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+/* ---------- serviços ---------- */
+.servico { display: grid; gap: 10px; padding: 14px 0; border-top: 1px solid var(--linha); }
+.servico:first-child { border-top: 0; padding-top: 0; }
+.servico-topo { display: flex; gap: 10px; align-items: baseline; }
+.servico-topo b { flex: 1; min-width: 0; overflow-wrap: anywhere; font-weight: 600; }
+.pct { font-family: var(--fonte-cond); font-weight: 700; font-size: 34px; line-height: 1; font-variant-numeric: tabular-nums; color: var(--texto); }
+.pct small { font-size: 18px; }
+.pct.subiu { color: var(--verde-2); }
+.barra-pct { display: grid; grid-template-columns: 48px 1fr 48px; gap: 8px; align-items: center; }
+.barra-pct button { height: 44px; border-radius: 8px; border: 1px solid var(--linha-forte); background: var(--papel-2); font-weight: 700; font-size: 15px; color: var(--texto-2); }
+input[type="range"] { width: 100%; height: 44px; accent-color: var(--verde-2); }
+.antes { font-size: 13px; color: var(--texto-3); }
+
+/* ---------- fotos ---------- */
+.botoes-foto { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.botoes-foto .btn { min-height: 64px; flex-direction: column; gap: 4px; font-size: 15px; }
+.orienta { display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 12px; align-items: center; }
+.orienta svg { color: var(--verde-2); }
+.orienta b { display: block; font-size: 15px; }
+.orienta span { font-size: 13.5px; color: var(--texto-2); }
+.gps { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; flex-wrap: wrap; }
+.gps .bolinha { width: 9px; height: 9px; border-radius: 50%; background: var(--texto-3); flex: none; }
+.gps.ok { color: var(--verde-tinta); } .gps.ok .bolinha { background: var(--verde-2); }
+.gps.buscando { color: var(--cli); } .gps.buscando .bolinha { background: var(--cli); animation: pulsa 1s infinite alternate; }
+.gps.erro { color: var(--venc); } .gps.erro .bolinha { background: var(--venc); }
+.grade-fotos { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.foto { display: grid; gap: 6px; min-width: 0; }
+.foto-img { position: relative; aspect-ratio: 4 / 3; border-radius: 10px; overflow: hidden; background: var(--papel-2); max-width: 100%; }
+.foto-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.foto-img .rm { position: absolute; top: 8px; right: 8px; width: 38px; height: 38px; border-radius: 50%; border: 0; background: rgba(0, 0, 0, .6); color: #fff; display: grid; place-items: center; }
+.foto-img .n { position: absolute; left: 8px; top: 8px; background: rgba(0, 0, 0, .6); color: #fff; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
+.foto-meta { display: flex; gap: 6px 12px; flex-wrap: wrap; font-size: 13px; color: var(--texto-3); }
+.foto-meta .ok { color: var(--verde-tinta); font-weight: 600; }
+.foto-meta .warn { color: var(--cli); font-weight: 600; }
+.foto-meta .bad { color: var(--venc); font-weight: 600; }
+.foto input, .foto select { width: 100%; min-height: 42px; font-size: 15px; }
+.corte { position: relative; margin: 0 auto; max-height: 52vh; border-radius: 10px; overflow: hidden; background: #000; }
+.corte img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.corte-quadro { position: absolute; left: 0; right: 0; border: 3px solid var(--topo-acento); box-shadow: 0 0 0 9999px rgba(0, 0, 0, .55); border-radius: 4px; transition: top .15s; }
+
+/* ---------- formulários ---------- */
+.campo { display: grid; gap: 6px; }
+.campo label, .campo .rotulo-campo { font-weight: 600; font-size: 14px; color: var(--texto-2); }
+.campo .dica { font-size: 13px; color: var(--texto-3); }
+.campo .erro { font-size: 13px; color: var(--venc); font-weight: 600; }
+input[type="text"], input[type="tel"], input[type="date"], input[type="search"], select, textarea {
+  width: 100%; min-height: var(--tap); border: 1px solid var(--linha-forte); border-radius: 8px; background: var(--papel); padding: 10px 12px; font-size: 16px;
+}
+textarea { min-height: 140px; resize: vertical; line-height: 1.45; }
+input:focus, select:focus, textarea:focus { border-color: var(--verde-2); outline: none; box-shadow: 0 0 0 3px var(--verde-3); }
+.invalido { border-color: var(--venc) !important; }
+
+/* ---------- folha (bottom sheet) ---------- */
+#sheet { position: fixed; inset: 0; z-index: 40; display: grid; align-items: end; background: rgba(10, 20, 16, .45); }
+.folha {
+  background: var(--fundo); border-radius: 16px 16px 0 0; max-height: 92vh; overflow-y: auto; width: 100%; max-width: 680px; margin: 0 auto;
+  padding: 8px 16px calc(20px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 14px; box-shadow: 0 -4px 18px rgba(0, 0, 0, .18);
+}
+.folha-alca { width: 44px; height: 5px; border-radius: 3px; background: var(--linha-forte); margin: 4px auto 0; }
+.folha-topo { display: flex; align-items: center; gap: 8px; }
+.folha-topo h2 { flex: 1; margin: 0; font-family: var(--fonte-cond); font-weight: 600; font-size: 22px; }
+.folha-acoes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.lista-sel { display: grid; gap: 8px; }
+.item-sel {
+  width: 100%; text-align: left; border: 1px solid var(--linha); border-radius: 10px; background: var(--papel); padding: 10px 12px; min-height: 52px;
+  display: flex; align-items: center; gap: 10px; color: var(--texto);
+}
+.item-sel[aria-pressed="true"] { border-color: var(--verde-2); background: var(--verde-3); color: var(--verde-tinta); }
+.item-sel .cresce { flex: 1; min-width: 0; }
+.item-sel small { display: block; color: var(--texto-3); font-size: 13px; }
+
+/* ---------- revisão / fila ---------- */
+.resumo { display: grid; gap: 6px; }
+.resumo-linha { display: flex; gap: 10px; align-items: baseline; justify-content: space-between; border-top: 1px solid var(--linha); padding-top: 8px; }
+.resumo-linha:first-child { border-top: 0; padding-top: 0; }
+.resumo-linha span { color: var(--texto-2); }
+.resumo-linha b { text-align: right; min-width: 0; overflow-wrap: anywhere; font-weight: 600; }
+.pend { display: grid; gap: 8px; }
+.tira { display: flex; gap: 6px; overflow-x: auto; }
+.tira img { width: 80px; height: 60px; object-fit: cover; border-radius: 6px; flex: none; background: var(--papel-2); }
+.vazio { text-align: center; color: var(--texto-3); padding: 18px 8px; display: grid; gap: 10px; justify-items: center; }
+.vazio b { color: var(--texto); font-family: var(--fonte-cond); font-weight: 600; font-size: 19px; }
+.demo-aviso { border: 1px solid var(--linha); border-left: 4px solid var(--cli); background: var(--papel); color: var(--texto-2); font-size: 14px; padding: 10px 14px; border-radius: 10px; }
+.demo-aviso b { color: var(--texto); }
+
+#toast {
+  position: fixed; left: 16px; right: 16px; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); z-index: 60; max-width: 520px; margin: 0 auto;
+  background: var(--texto); color: var(--papel); padding: 12px 16px; border-radius: 8px; font-weight: 600; box-shadow: var(--sombra-2);
+}
+.ocupado { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; background: rgba(10, 20, 16, .55); color: #fff; font-weight: 600; padding: 24px; text-align: center; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+@media (min-width: 560px) { .grade-fotos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 380px) { .logo-txt, .logo-div { display: none; } }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="sheet" hidden></div>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+<input type="file" id="inpCamera" accept="image/*" capture="environment" hidden>
+<input type="file" id="inpGaleria" accept="image/*" multiple hidden>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-sol" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></g></symbol>
+    <symbol id="i-parcial" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.2v1.4M3.7 9h1.4M5.2 5.7l1 1M11.8 5.7l-1 1"/><path d="M6.2 11.4a3.2 3.2 0 0 1 5.6-2.6"/><path d="M8.5 20h9a3.6 3.6 0 0 0 .5-7.2 5 5 0 0 0-9.4 1.2A3 3 0 0 0 8.5 20z"/></g></symbol>
+    <symbol id="i-nublado" viewBox="0 0 24 24"><path d="M7 19h10.2a4.3 4.3 0 0 0 .6-8.5A6 6 0 0 0 6.3 11.6 3.8 3.8 0 0 0 7 19z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chuva" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 15.5h10.2a4.1 4.1 0 0 0 .6-8.2A5.8 5.8 0 0 0 6.4 8.4 3.6 3.6 0 0 0 7 15.5z"/><path d="M8.5 18l-1 2.5M12.5 18l-1 2.5M16.5 18l-1 2.5"/></g></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3.5 8.5A2 2 0 0 1 5.5 6.5h2l1.5-2h6l1.5 2h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.6"/></g></symbol>
+    <symbol id="i-galeria" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M20.5 15.5l-5-5-9 9"/></g></symbol>
+    <symbol id="i-mais" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-voltar" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-alerta" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.5M12 17.3v.2"/></g></symbol>
+    <symbol id="i-relogio" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></g></symbol>
+    <symbol id="i-mais-v" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="12" cy="5.5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="18.5" r="1.8"/></g></symbol>
+    <symbol id="i-sync" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 12a7.5 7.5 0 0 1-13.2 4.9M4.5 12A7.5 7.5 0 0 1 17.7 7.1"/><path d="M18 3.5v4h-4M6 20.5v-4h4"/></g></symbol>
+    <symbol id="i-pessoas" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19.5a5.5 5.5 0 0 1 11 0"/><circle cx="16.8" cy="9.5" r="2.5"/><path d="M15.5 14.4a4.6 4.6 0 0 1 5 5.1"/></g></symbol>
+    <symbol id="i-seta" viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-deitado" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="15" width="38" height="22" rx="4"/><circle cx="37" cy="26" r="3.2"/><path d="M10 21v10"/><path d="M15 9.5a14 14 0 0 1 18 0"/><path d="M33 5.5v4h-4"/></g></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></g></symbol>
+    <symbol id="i-lixo" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 12.5h9l1-12.5"/></g></symbol>
+  </defs>
+</svg>
+
+<script>
+'use strict';
+/* =====================================================================
+   Diário de Obra Rijo · app do API Vobi 06 · v0.2.0
+   Funciona sem sinal: tudo fica no celular (IndexedDB) e vai para o
+   servidor (Google Apps Script) quando houver conexão.
+   ===================================================================== */
+const VERSAO_APP = '0.2.0';
+const CFG = Object.assign({ API_URL: 'demo', CARIMBO_FOTO: true, FOTO_MAX_PX: 1600, FOTO_QUALIDADE: 0.72 }, window.RDO_CONFIG || {});
+const DEMO = !CFG.API_URL || CFG.API_URL === 'demo';
+const LOGO_NEG = 'data:image/png;base64,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';
+
+const PERIODOS = [{ id: 'morning', nome: 'Manhã' }, { id: 'afternoon', nome: 'Tarde' }, { id: 'night', nome: 'Noite' }];
+const TEMPOS = [
+  { id: 'clean', nome: 'Limpo', icone: 'i-sol' }, { id: 'partlyCloudy', nome: 'Parc. nublado', icone: 'i-parcial' },
+  { id: 'cloudy', nome: 'Nublado', icone: 'i-nublado' }, { id: 'rainy', nome: 'Chuvoso', icone: 'i-chuva' }
+];
+const PASSOS = [
+  { id: 'clima', nome: 'Clima' }, { id: 'equipe', nome: 'Equipe' }, { id: 'servicos', nome: 'Serviços' },
+  { id: 'fotos', nome: 'Fotos' }, { id: 'ocorrencias', nome: 'Ocorrências' }, { id: 'revisar', nome: 'Revisar' }
+];
+const ATALHOS_OCORRENCIA = ['Visita do cliente', 'Entrega de material', 'Fiscalização / visita técnica', 'Chuva interrompeu o serviço',
+  'Falta de material', 'Equipamento parado', 'Acidente / incidente', 'Concretagem'];
+
+/* ---------- utilidades ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const ic = (id, t = 22) => `<svg width="${t}" height="${t}" aria-hidden="true"><use href="#${id}"/></svg>`;
+const uuid = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID() :
+  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); });
+const pad = n => String(n).padStart(2, '0');
+const isoLocal = (d = new Date()) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const somaDias = (iso, n) => { const d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + n); return isoLocal(d); };
+const br = iso => iso ? `${iso.slice(8, 10)}/${iso.slice(5, 7)}` : '';
+const brAno = iso => iso ? `${br(iso)}/${iso.slice(0, 4)}` : '';
+const diaSemana = iso => { const g = new Date(iso + 'T12:00:00').getDay(); return g === 0 ? 7 : g; };
+const NOME_DIA = ['', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'];
+const dataLonga = iso => { const s = new Date(iso + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }); return s.charAt(0).toUpperCase() + s.slice(1); };
+const hora = iso => { try { return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } };
+const mb = b => (b / 1048576).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' MB';
+const hoje = () => isoLocal();
+function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* sem armazenamento */ } }
+
+/* ---------- banco local (IndexedDB, com memória como reserva) ---------- */
+const DB = (() => {
+  const LOJAS = ['kv', 'rascunhos', 'fila', 'fotos'];
+  const mem = {}; LOJAS.forEach(n => { mem[n] = new Map(); });
+  let pdb = null;
+  function abrir() {
+    if (!pdb) pdb = new Promise(ok => {
+      try {
+        const r = indexedDB.open('rdo-rijo', 1);
+        r.onupgradeneeded = () => LOJAS.forEach(n => { if (!r.result.objectStoreNames.contains(n)) r.result.createObjectStore(n); });
+        r.onsuccess = () => ok(r.result);
+        r.onerror = () => ok(null);
+        r.onblocked = () => ok(null);
+      } catch (e) { ok(null); }
+    });
+    return pdb;
+  }
+  async function op(loja, modo, fn, fnMem) {
+    const db = await abrir();
+    if (!db) return fnMem(mem[loja]);
+    return new Promise((ok, ko) => {
+      const t = db.transaction(loja, modo);
+      const req = fn(t.objectStore(loja));
+      t.oncomplete = () => ok(req ? req.result : undefined);
+      t.onerror = () => ko(t.error); t.onabort = () => ko(t.error);
+    });
+  }
+  return {
+    get: (l, k) => op(l, 'readonly', s => s.get(k), m => m.get(k)),
+    put: (l, k, v) => op(l, 'readwrite', s => s.put(v, k), m => { m.set(k, v); }),
+    del: (l, k) => op(l, 'readwrite', s => s.delete(k), m => { m.delete(k); }),
+    all: l => op(l, 'readonly', s => s.getAll(), m => [...m.values()]),
+  };
+})();
+
+/* ---------- estado ---------- */
+const S = {
+  token: null, boot: null, fila: [], rascunhos: {}, tela: 'carregando', rd: null, obra: null, passo: 0,
+  sincronizando: false, online: navigator.onLine, ultimaSync: null, sheet: null, urls: new Map(), msgAcesso: '', cortes: []
+};
+const obraDe = cod => (S.boot && S.boot.obras || []).find(o => o.codigo === cod);
+
+/* ---------- servidor ---------- */
+async function api(acao, dados, ms = 45000) {
+  if (DEMO) return Demo.chamar(acao, dados);
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), ms);
+  try {
+    const r = await fetch(CFG.API_URL, { method: 'POST', body: JSON.stringify({ acao, token: S.token, dados }), signal: ctrl.signal, redirect: 'follow' });
+    const txt = await r.text();
+    try { return JSON.parse(txt); } catch (e) { throw Object.assign(new Error('Resposta inesperada do servidor (HTTP ' + r.status + ').'), { rede: true }); }
+  } catch (e) {
+    if (e.rede) throw e;
+    throw Object.assign(new Error(e.name === 'AbortError' ? 'Sem resposta do servidor (sinal fraco).' : 'Sem conexão com a internet.'), { rede: true });
+  } finally { clearTimeout(t); }
+}
+
+async function atualizarBoot() {
+  try {
+    const r = await api('bootstrap', {});
+    if (!r.ok) {
+      if (r.codigo === 'token') { S.msgAcesso = r.erro; S.tela = 'acesso'; render(); }
+      else toast(r.erro);
+      return false;
+    }
+    S.boot = r; S.online = true;
+    await DB.put('kv', 'boot', r);
+    renderSuave();
+    return true;
+  } catch (e) {
+    S.online = false; renderSuave();
+    return false;
+  }
+}
+
+/* ---------- fila de envio ---------- */
+const ESTADOS_ATIVOS = ['pendente', 'fotos'];
+
+async function salvarItem(it) { await DB.put('fila', it.id, it); }
+
+async function sincronizar() {
+  if (S.sincronizando || !S.token) return;
+  S.sincronizando = true; renderBarra();
+  let mudou = false;
+  try {
+    for (const it of S.fila.filter(i => ESTADOS_ATIVOS.includes(i.estado))) {
+      if (it.estado === 'pendente') {
+        const r = await api('enviarDiario', it.payload);
+        if (!r.ok) {
+          if (['duplicado', 'permissao', 'invalido', 'token'].includes(r.codigo)) { it.estado = 'rejeitado'; it.erro = r.erro; await salvarItem(it); mudou = true; continue; }
+          throw Object.assign(new Error(r.erro), { temporario: true });
+        }
+        it.estado = 'fotos'; it.erro = ''; it.servidor = { status: r.status, avisos: r.avisos || [], envioVobi: r.envioVobi };
+        await salvarItem(it); mudou = true;
+      }
+      let total = it.fotos.length, i = 0;
+      for (const f of it.fotos) {
+        i++;
+        if (f.enviada) continue;
+        S.progresso = `Enviando foto ${i} de ${total} · ${it.obra}`; renderBarra();
+        const reg = await DB.get('fotos', f.id);
+        if (!reg) { f.enviada = true; f.perdida = true; await salvarItem(it); continue; }
+        const r = await api('enviarFoto', {
+          idDiario: it.id, id: f.id, mime: reg.type || 'image/jpeg', base64: await bufParaBase64(reg.buf),
+          legenda: f.legenda || '', idServico: f.idServico || '', ordem: f.ordem,
+          tiradaEm: f.tiradaEm || '', lat: f.lat, lon: f.lon, precisao: f.precisao, origemLocal: f.origemLocal, distanciaObraM: f.distanciaObraM, largura: f.largura, altura: f.altura
+        }, 120000);
+        if (!r.ok) {
+          if (r.codigo === 'sem-diario') { it.estado = 'pendente'; await salvarItem(it); break; }
+          throw Object.assign(new Error(r.erro), { temporario: true });
+        }
+        f.enviada = true; await salvarItem(it); mudou = true;
+      }
+      if (it.estado === 'fotos' && it.fotos.every(f => f.enviada)) {
+        it.estado = 'recebido'; it.recebidoEm = new Date().toISOString();
+        await salvarItem(it);
+        for (const f of it.fotos) { await DB.del('fotos', f.id); liberarUrl(f.id); }
+        mudou = true;
+      }
+    }
+    // situação na Vobi dos diários recebidos nos últimos dias
+    const limite = Date.now() - 10 * 864e5;
+    const acomp = S.fila.filter(i => i.estado === 'recebido' && !(i.servidor && i.servidor.status === 'enviado') && Date.parse(i.recebidoEm) > limite);
+    if (acomp.length) {
+      const r = await api('situacao', { ids: acomp.map(i => i.id) });
+      if (r.ok) for (const it of acomp) {
+        const s = r.diarios && r.diarios[it.id];
+        if (s) { it.servidor = Object.assign({}, it.servidor, s); await salvarItem(it); mudou = true; }
+      }
+    }
+    // limpa histórico antigo (30 dias)
+    for (const it of S.fila.filter(i => (i.estado === 'recebido' || i.estado === 'descartado') && Date.now() - Date.parse(i.recebidoEm || i.criadoEm) > 30 * 864e5)) {
+      await DB.del('fila', it.id); S.fila = S.fila.filter(x => x !== it);
+    }
+    S.online = true; S.erroSync = '';
+    if (mudou || !S.boot || Date.now() - Date.parse(S.boot.geradoEm || 0) > 10 * 60000) await atualizarBoot();
+    S.ultimaSync = new Date().toISOString(); await DB.put('kv', 'ultimaSync', S.ultimaSync);
+  } catch (e) {
+    if (e.rede) S.online = false;
+    S.erroSync = e.message;
+    const it = S.fila.find(i => ESTADOS_ATIVOS.includes(i.estado));
+    if (it) { it.erro = e.message; it.tentativas = (it.tentativas || 0) + 1; await salvarItem(it); }
+  } finally {
+    S.sincronizando = false; S.progresso = '';
+    renderSuave();
+  }
+}
+
+function bufParaBase64(buf) {
+  return new Promise(ok => {
+    const fr = new FileReader();
+    fr.onload = () => ok(String(fr.result).split(',')[1] || '');
+    fr.readAsDataURL(new Blob([buf], { type: 'image/jpeg' }));
+  });
+}
+
+/* ---------- estado da obra: servidor + o que ainda está só no celular ---------- */
+function estadoObra(cod) {
+  const ob = obraDe(cod) || { equipe: [], servicos: [] };
+  const equipe = ob.equipe.map(c => Object.assign({}, c));
+  const servicos = ob.servicos.map(s => Object.assign({}, s));
+  const gerado = (S.boot && S.boot.geradoEm) || '';
+  const pend = S.fila.filter(i => !['rejeitado', 'descartado'].includes(i.estado) && (i.estado !== 'recebido' || (i.recebidoEm || '') > gerado))
+    .sort((a, b) => a.data.localeCompare(b.data) || a.criadoEm.localeCompare(b.criadoEm));
+  for (const it of pend) {
+    const p = it.payload;
+    if (it.obra === cod) {
+      p.novos.forEach(n => { if (!equipe.some(c => c.id === n.id)) equipe.push(Object.assign({}, n)); });
+      p.chegadas.forEach(ch => { if (!equipe.some(c => c.id === ch.id)) equipe.push({ id: ch.id, nome: ch.nome, funcao: ch.funcao, inicio: ch.inicio }); });
+      p.atualizacoes.forEach(a => { const c = equipe.find(x => x.id === a.id); if (c) Object.assign(c, a); });
+      p.saidas.forEach(s => { const k = equipe.findIndex(x => x.id === s.id); if (k >= 0) equipe.splice(k, 1); });
+      p.servicos.forEach(sv => {
+        const x = servicos.find(y => y.id === sv.id);
+        if (x) { x.percentual = sv.percentual; x.status = sv.percentual >= 100 ? 'concluido' : 'ativo'; }
+        else servicos.push({ id: sv.id, nome: sv.nome, percentual: sv.percentual, status: sv.percentual >= 100 ? 'concluido' : 'ativo' });
+      });
+    } else {
+      p.saidas.filter(s => s.motivo === 'transferencia' && s.obraDestino === cod).forEach(s => {
+        if (!equipe.some(c => c.id === s.id)) equipe.push({ id: s.id, nome: s.nome, funcao: s.funcao, inicio: s.data });
+      });
+    }
+  }
+  equipe.sort((a, b) => String(a.nome).localeCompare(String(b.nome)));
+  return { equipe, servicos };
+}
+
+/** Diário daquela obra/dia: no servidor, na fila do celular ou em rascunho. */
+function situacaoDia(cod, data) {
+  const it = S.fila.find(i => i.obra === cod && i.data === data && !['rejeitado', 'descartado'].includes(i.estado));
+  if (it) return { tipo: 'fila', it };
+  const ob = obraDe(cod);
+  const d = ob && ob.diarios.find(x => x.data === data);
+  if (d) return { tipo: 'servidor', d };
+  if (S.rascunhos[cod + '|' + data]) return { tipo: 'rascunho' };
+  return null;
+}
+
+function diasFaltando(cod) {
+  const cfg = (S.boot && S.boot.config) || { diasTrabalho: [1, 2, 3, 4, 5, 6] };
+  const out = [];
+  for (let i = 7; i >= 1; i--) {
+    const d = somaDias(hoje(), -i);
+    if (!cfg.diasTrabalho.includes(diaSemana(d))) continue;
+    if (!situacaoDia(cod, d) || situacaoDia(cod, d).tipo === 'rascunho') out.push(d);
+  }
+  return out;
+}
+
+/* ---------- rascunho ---------- */
+function novoRascunho(cod, data) {
+  const ob = obraDe(cod);
+  const est = estadoObra(cod);
+  const prev = ob && ob.previsao && ob.previsao[data];
+  const clima = {};
+  PERIODOS.forEach(p => {
+    const sug = prev && prev[p.id];
+    clima[p.id] = { checked: p.id !== 'night', weather: sug ? sug.weather : null, status: sug ? sug.status : 'practicable', sugerido: !!sug, chuvaMm: sug ? sug.chuvaMm : null };
+  });
+  return {
+    id: uuid(), obra: cod, data, criadoEm: new Date().toISOString(), passo: 0, clima,
+    equipe: est.equipe.map(c => Object.assign({}, c, { presente: true, motivoFalta: '' })),
+    servicos: est.servicos.filter(s => (s.percentual || 0) < 100 && s.status !== 'oculto')
+      .map(s => ({ id: s.id, nome: s.nome, anterior: s.percentual || 0, percentual: s.percentual || 0, obs: '', trabalhou: false })),
+    concluidos: est.servicos.filter(s => (s.percentual || 0) >= 100).length,
+    fotos: [], ocorrencias: '', semOcorrencias: false
+  };
+}
+
+let timerRd = null;
+function salvarRd(imediato) {
+  if (!S.rd) return;
+  const rd = S.rd;
+  rd.atualizadoEm = new Date().toISOString();
+  S.rascunhos[rd.obra + '|' + rd.data] = true;
+  clearTimeout(timerRd);
+  const f = () => DB.put('rascunhos', rd.obra + '|' + rd.data, rd);
+  if (imediato) return f();
+  timerRd = setTimeout(f, 350);
+}
+
+async function abrirDiario(cod, data, substituirHistorico) {
+  const s = situacaoDia(cod, data);
+  if (s && s.tipo !== 'rascunho') { toast(`Já existe diário de ${br(data)} nesta obra.`); if (substituirHistorico) history.back(); return; }
+  let rd = await DB.get('rascunhos', cod + '|' + data);
+  if (!rd) rd = novoRascunho(cod, data);
+  S.rd = rd; S.obra = obraDe(cod); S.passo = rd.passo || 0; S.tela = 'diario';
+  if (substituirHistorico) history.replaceState({ tela: 'diario' }, ''); else history.pushState({ tela: 'diario' }, '');
+  salvarRd(true);
+  render(); window.scrollTo(0, 0);
+}
+
+function irPasso(n) {
+  S.passo = Math.max(0, Math.min(PASSOS.length - 1, n));
+  S.rd.passo = S.passo; salvarRd();
+  render(); window.scrollTo(0, 0);
+}
+
+function montarPayload(rd) {
+  const ativos = rd.equipe.filter(c => !c.saida);
+  const clima = {};
+  PERIODOS.forEach(p => { const c = rd.clima[p.id]; clima[p.id] = { checked: !!c.checked, weather: c.weather || 'clean', status: c.status || 'practicable' }; });
+  return {
+    id: rd.id, obra: rd.obra, data: rd.data, versaoApp: VERSAO_APP, criadoEm: rd.criadoEm, clima,
+    equipe: ativos.map(c => ({ id: c.id, nome: c.nome, funcao: c.funcao, presente: !!c.presente, motivoFalta: c.presente ? '' : (c.motivoFalta || 'Falta') })),
+    novos: rd.equipe.filter(c => c.novo).map(c => ({
+      id: c.id, nome: c.nome, funcao: c.funcao, telefone: c.telefone, documento: c.documento, vinculo: c.vinculo,
+      empresa: c.empresa || '', alojado: !!c.alojado, alojamento: c.alojado ? c.alojamento : '', inicio: c.inicio
+    })),
+    chegadas: rd.equipe.filter(c => c.chegada).map(c => ({ id: c.id, nome: c.nome, funcao: c.funcao, inicio: c.inicio })),
+    atualizacoes: rd.equipe.filter(c => c.atualizacao && !c.novo).map(c => Object.assign({ id: c.id }, c.atualizacao)),
+    saidas: rd.equipe.filter(c => c.saida).map(c => Object.assign({ id: c.id, nome: c.nome, funcao: c.funcao }, c.saida)),
+    servicos: rd.servicos.filter(s => s.novo || s.trabalhou || s.percentual !== s.anterior || s.obs)
+      .map(s => ({ id: s.id, nome: s.nome, novo: !!s.novo, anterior: s.anterior, percentual: s.percentual, obs: s.obs || '', trabalhou: !!s.trabalhou })),
+    ocorrencias: rd.ocorrencias.trim(),
+    fotos: rd.fotos.map((f, i) => ({ id: f.id, legenda: f.legenda || '', idServico: f.idServico || '', ordem: i + 1, tiradaEm: f.tiradaEm || '', lat: f.lat === undefined ? null : f.lat, lon: f.lon === undefined ? null : f.lon, precisao: f.precisao || null, origemLocal: f.origemLocal || 'nenhuma', distanciaObraM: f.distanciaObraM === undefined ? null : f.distanciaObraM, largura: f.largura || null, altura: f.altura || null }))
+  };
+}
+
+function pendencias(rd) {
+  const bloq = [], avisos = [];
+  const marcados = PERIODOS.filter(p => rd.clima[p.id].checked);
+  if (!marcados.length) bloq.push({ passo: 0, txt: 'Marque o clima de pelo menos um período.' });
+  marcados.forEach(p => { if (!rd.clima[p.id].weather) bloq.push({ passo: 0, txt: `Escolha o tempo da ${p.nome.toLowerCase()}.` }); });
+  const ativos = rd.equipe.filter(c => !c.saida);
+  const pres = ativos.filter(c => c.presente).length;
+  if (!pres) avisos.push({ passo: 1, txt: 'Ninguém presente na obra neste dia.' });
+  const minFotos = (S.boot && S.boot.config && S.boot.config.minFotos) || 1;
+  if (rd.fotos.length < minFotos) avisos.push({ passo: 3, txt: rd.fotos.length ? `Só ${rd.fotos.length} foto(s); o mínimo combinado é ${minFotos}.` : 'Nenhuma foto. O diário aparece incompleto no painel.' });
+  const semLocal = rd.fotos.filter(f => f.lat === null || f.lat === undefined).length;
+  if (semLocal) avisos.push({ passo: 3, txt: `${semLocal} foto(s) sem localização. Para sair georreferenciada, use "Tirar foto" com o GPS ligado.` });
+  const longe = rd.fotos.filter(f => f.distanciaObraM !== null && f.distanciaObraM !== undefined && f.distanciaObraM > raioObra()).length;
+  if (longe) avisos.push({ passo: 3, txt: `${longe} foto(s) tirada(s) a mais de ${distTxt(raioObra())} da obra.` });
+  const atualizados = rd.servicos.filter(s => s.trabalhou || s.percentual !== s.anterior || s.novo).length;
+  if (!atualizados) avisos.push({ passo: 2, txt: 'Nenhum serviço atualizado.' });
+  if (!rd.ocorrencias.trim() && !rd.semOcorrencias) avisos.push({ passo: 4, txt: 'Ocorrências em branco. Marque "Sem ocorrências" se for o caso.' });
+  return { bloq, avisos };
+}
+
+function passoFeito(i, rd) {
+  switch (PASSOS[i].id) {
+    case 'clima': return PERIODOS.some(p => rd.clima[p.id].checked) && PERIODOS.every(p => !rd.clima[p.id].checked || rd.clima[p.id].weather);
+    case 'equipe': return !!rd.equipeConferida;
+    case 'servicos': return rd.servicos.some(s => s.trabalhou || s.percentual !== s.anterior || s.novo);
+    case 'fotos': return rd.fotos.length > 0;
+    case 'ocorrencias': return !!rd.ocorrencias.trim() || rd.semOcorrencias;
+    default: return false;
+  }
+}
+
+async function enviarDiario() {
+  const rd = S.rd;
+  const ob = obraDe(rd.obra);
+  const payload = montarPayload(rd);
+  const it = {
+    id: rd.id, obra: rd.obra, obraNome: ob ? ob.nome : rd.obra, data: rd.data, payload,
+    fotos: rd.fotos.map((f, i) => ({ id: f.id, ordem: i + 1, legenda: f.legenda || '', idServico: f.idServico || '', enviada: false, tiradaEm: f.tiradaEm || '', lat: f.lat === undefined ? null : f.lat, lon: f.lon === undefined ? null : f.lon, precisao: f.precisao || null, origemLocal: f.origemLocal || 'nenhuma', distanciaObraM: f.distanciaObraM === undefined ? null : f.distanciaObraM, largura: f.largura || null, altura: f.altura || null })),
+    estado: 'pendente', criadoEm: new Date().toISOString(), tentativas: 0, erro: ''
+  };
+  clearTimeout(timerRd);
+  await salvarItem(it);
+  S.fila.push(it);
+  await DB.del('rascunhos', rd.obra + '|' + rd.data);
+  delete S.rascunhos[rd.obra + '|' + rd.data];
+  S.rd = null; S.sheet = null; S.tela = 'inicio'; pararGPS();
+  history.replaceState({ tela: 'inicio' }, '');
+  render(); window.scrollTo(0, 0);
+  toast(navigator.onLine ? 'Diário guardado. Enviando…' : 'Diário guardado no celular. Vai sozinho quando pegar sinal.');
+  sincronizar();
+}
+
+async function descartarRascunho() {
+  const rd = S.rd;
+  for (const f of rd.fotos) { await DB.del('fotos', f.id); liberarUrl(f.id); }
+  clearTimeout(timerRd);
+  await DB.del('rascunhos', rd.obra + '|' + rd.data);
+  delete S.rascunhos[rd.obra + '|' + rd.data];
+  S.rd = null; S.sheet = null; S.tela = 'inicio'; pararGPS();
+  history.replaceState({ tela: 'inicio' }, '');
+  render(); toast('Rascunho descartado.');
+}
+
+/* ---------- localização: GPS do aparelho (funciona sem internet) ---------- */
+const GPS = { id: null, pos: null, erro: '', buscando: false };
+function iniciarGPS() {
+  if (GPS.id !== null) return;
+  if (!navigator.geolocation) { GPS.erro = 'Este celular não informa a localização.'; gpsDemo(); return; }
+  GPS.buscando = true;
+  try {
+    GPS.id = navigator.geolocation.watchPosition(p => {
+      GPS.pos = { lat: p.coords.latitude, lon: p.coords.longitude, precisao: Math.round(p.coords.accuracy), em: Date.now() };
+      GPS.erro = ''; GPS.buscando = false; atualizarGpsUI();
+    }, e => {
+      GPS.buscando = false;
+      GPS.erro = e && e.code === 1 ? 'Localização bloqueada. Permita a localização para este app nas configurações do navegador.' : 'Sem sinal de GPS agora. Vá para uma área mais aberta.';
+      if (e && e.code === 1) pararGPS();
+      gpsDemo(); atualizarGpsUI();
+    }, { enableHighAccuracy: true, maximumAge: 30000, timeout: 30000 });
+  } catch (e) { GPS.buscando = false; GPS.id = null; GPS.erro = 'Localização indisponível.'; gpsDemo(); }
+}
+function pararGPS() { if (GPS.id !== null && navigator.geolocation) navigator.geolocation.clearWatch(GPS.id); GPS.id = null; GPS.buscando = false; }
+/** Na demonstração (navegador sem permissão de localização) usa um ponto de exemplo, marcado como tal. */
+function gpsDemo() { if (DEMO && !gpsFresco()) { GPS.pos = { lat: -8.054280, lon: -34.881060, precisao: 9, em: Date.now(), demo: true }; GPS.erro = ''; } }
+function gpsFresco() { return GPS.pos && Date.now() - GPS.pos.em < 120000 ? GPS.pos : null; }
+function htmlGps() {
+  const p = gpsFresco();
+  if (p) return `<div class="gps ok" id="gpsStatus"><span class="bolinha"></span>Localização pronta · precisão ±${p.precisao} m${p.demo ? ' (ponto de exemplo)' : ''}</div>`;
+  if (GPS.erro) return `<div class="gps erro" id="gpsStatus"><span class="bolinha"></span>${esc(GPS.erro)} <button class="btn mini" data-act="gpsDeNovo">Tentar de novo</button></div>`;
+  return `<div class="gps buscando" id="gpsStatus"><span class="bolinha"></span>Buscando localização (GPS)…</div>`;
+}
+function atualizarGpsUI() { const el = document.getElementById('gpsStatus'); if (el) el.outerHTML = htmlGps(); }
+function pegarPosicao(ms) {
+  const p = gpsFresco();
+  if (p) return Promise.resolve(p);
+  iniciarGPS();
+  return new Promise(ok => {
+    const t0 = Date.now();
+    const iv = setInterval(() => { const q = gpsFresco(); if (q || GPS.erro || Date.now() - t0 > ms) { clearInterval(iv); ok(q); } }, 250);
+  });
+}
+function distanciaM(a, b) {
+  const R = 6371000, rad = x => x * Math.PI / 180;
+  const dLat = rad(b.lat - a.lat), dLon = rad(b.lon - a.lon);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon / 2) ** 2;
+  return Math.round(2 * R * Math.asin(Math.sqrt(h)));
+}
+const distTxt = m => m >= 1000 ? (m / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' km' : m + ' m';
+const raioObra = () => (S.boot && S.boot.config && S.boot.config.raioObraM) || 1000;
+
+/* ---------- EXIF: data e GPS gravados pela câmera (quando o celular deixa passar) ---------- */
+function lerExif(buf) {
+  const v = new DataView(buf);
+  if (v.byteLength < 4 || v.getUint16(0) !== 0xFFD8) return null;
+  let o = 2;
+  while (o < v.byteLength - 10) {
+    const m = v.getUint16(o);
+    if ((m & 0xFF00) !== 0xFF00) break;
+    const len = v.getUint16(o + 2);
+    if (m === 0xFFE1 && v.getUint32(o + 4) === 0x45786966) return lerTiff(v, o + 10);
+    if (m === 0xFFDA) break;
+    o += 2 + len;
+  }
+  return null;
+}
+function lerTiff(v, t) {
+  const le = v.getUint16(t) === 0x4949;
+  const u16 = p => v.getUint16(p, le), u32 = p => v.getUint32(p, le);
+  const ifd = p => { const n = u16(t + p), out = {}; for (let i = 0; i < n; i++) { const e = t + p + 2 + i * 12; out[u16(e)] = { tipo: u16(e + 2), n: u32(e + 4), val: e + 8 }; } return out; };
+  const numero = ent => {   // RATIONAL (5), DOUBLE (12), SHORT (3) ou LONG (4)
+    if (ent.tipo === 5) return rat(u32(ent.val));
+    if (ent.tipo === 12) return v.getFloat64(t + u32(ent.val), le);
+    if (ent.tipo === 3) return u16(ent.val);
+    if (ent.tipo === 4) return u32(ent.val);
+    return null;
+  };
+  const rat = p => u32(t + p) / (u32(t + p + 4) || 1);
+  const ascii = ent => { const off = ent.n > 4 ? t + u32(ent.val) : ent.val; let s = ''; for (let i = 0; i < ent.n - 1; i++) s += String.fromCharCode(v.getUint8(off + i)); return s; };
+  const r = {};
+  const i0 = ifd(u32(t + 4));
+  if (i0[0x8769]) { const ex = ifd(u32(i0[0x8769].val)); if (ex[0x9003]) r.data = ascii(ex[0x9003]); }
+  if (!r.data && i0[0x0132]) r.data = ascii(i0[0x0132]);
+  if (i0[0x8825]) {
+    const g = ifd(u32(i0[0x8825].val));
+    const coord = (k, ref) => {
+      if (!g[k] || g[k].n < 3) return null;
+      const off = u32(g[k].val);
+      let x = rat(off) + rat(off + 8) / 60 + rat(off + 16) / 3600;
+      const rf = g[ref] ? String.fromCharCode(v.getUint8(g[ref].val)) : '';
+      if (rf === 'S' || rf === 'W') x = -x;
+      return isFinite(x) ? x : null;
+    };
+    r.lat = coord(2, 1); r.lon = coord(4, 3);
+    if (g[0x1F]) { const pr = numero(g[0x1F]); r.precisao = pr > 0 && pr < 10000 ? pr : null; }
+    if (!r.lat && !r.lon) { r.lat = null; r.lon = null; }
+  }
+  if (r.data) {
+    const m = r.data.match(/^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})/);
+    r.quando = m ? new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]) : null;
+    if (r.quando && (isNaN(r.quando) || r.quando.getFullYear() < 2015)) r.quando = null;
+  }
+  return r;
+}
+
+/* ---------- fotos: sempre horizontais, com marca d'água Rijo (obra, data, hora e coordenadas) ---------- */
+async function processarArquivos(files, origem) {
+  if (!files || !files.length || !S.rd) return;
+  ocupado(origem === 'camera' ? 'Gravando a foto com data, hora e localização…' : `Preparando ${files.length > 1 ? files.length + ' fotos' : 'a foto'}…`);
+  let ok = 0;
+  for (const file of files) {
+    try {
+      const r = await prepararFoto(file, origem);
+      if (r.retrato) S.cortes.push(r);
+      else { await guardarFoto(r); ok++; }
+    } catch (e) { toast('Não consegui ler uma das fotos: ' + e.message); }
+  }
+  ocupado(false);
+  salvarRd(true);
+  render();
+  if (ok) toast(ok === 1 ? 'Foto adicionada.' : `${ok} fotos adicionadas.`);
+  if (S.cortes.length) abrirCorte();
+}
+
+function carregarImagem(fonte) {
+  return new Promise((ok, ko) => {
+    const url = URL.createObjectURL(fonte);
+    const img = new Image();
+    img.onload = () => { ok(img); setTimeout(() => URL.revokeObjectURL(url), 1000); };
+    img.onerror = () => { URL.revokeObjectURL(url); ko(new Error('formato não suportado')); };
+    img.src = url;
+  });
+}
+async function decodificar(blob) {
+  if (window.createImageBitmap) { try { return await createImageBitmap(blob, { imageOrientation: 'from-image' }); } catch (e) { /* cai no <img> */ } }
+  return carregarImagem(blob);
+}
+const novoCanvas = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+function canvasBlob(cv, q) {
+  return new Promise((ok, ko) => cv.toBlob(b => (b ? ok(b) : ko(new Error('falha ao comprimir'))), 'image/jpeg', q));
+}
+
+async function prepararFoto(file, origem) {
+  let exif = null;
+  try { exif = lerExif(await file.slice(0, 262144).arrayBuffer()); } catch (e) { exif = null; }
+  const fonte = await decodificar(file);
+  const w0 = fonte.width || fonte.naturalWidth, h0 = fonte.height || fonte.naturalHeight;
+  const fator = Math.min(1, CFG.FOTO_MAX_PX / Math.max(w0, h0));
+  const w = Math.round(w0 * fator), h = Math.round(h0 * fator);
+  const cv = novoCanvas(w, h);
+  cv.getContext('2d').drawImage(fonte, 0, 0, w, h);
+  if (fonte.close) fonte.close();
+
+  // quando: data da câmera (EXIF); senão, agora (câmera do app) ou a data do arquivo (galeria)
+  let quando = exif && exif.quando ? exif.quando : null;
+  if (!quando) quando = origem === 'camera' ? new Date() : new Date(file.lastModified || Date.now());
+  // onde: GPS gravado na foto (EXIF); senão, o GPS do celular agora — só para foto tirada pelo app
+  let local = null, origemLocal = 'nenhuma';
+  if (exif && exif.lat !== null && exif.lat !== undefined && exif.lon !== null && exif.lon !== undefined) {
+    local = { lat: exif.lat, lon: exif.lon, precisao: exif.precisao ? Math.round(exif.precisao) : null }; origemLocal = 'exif';
+  } else if (origem === 'camera') {
+    const p = await pegarPosicao(8000);
+    if (p) { local = { lat: p.lat, lon: p.lon, precisao: p.precisao }; origemLocal = p.demo ? 'exemplo' : 'gps'; }
+  }
+  const meta = { quando: quando.toISOString(), local, origemLocal, origem };
+  if (h > w * 1.02) {          // em pé: guarda sem carimbo e pede o recorte horizontal
+    const id = uuid();
+    const blob = await canvasBlob(cv, 0.9);
+    await DB.put('fotos', 'pend-' + id, { buf: await blob.arrayBuffer(), type: 'image/jpeg', w, h });
+    return { retrato: true, id, w, h, meta };
+  }
+  return { retrato: false, cv, meta };
+}
+
+async function guardarFoto(r) {
+  await carimbar(r.cv, r.meta);
+  const blob = await canvasBlob(r.cv, CFG.FOTO_QUALIDADE);
+  const id = r.id || uuid();
+  await DB.put('fotos', id, { buf: await blob.arrayBuffer(), type: 'image/jpeg', w: r.cv.width, h: r.cv.height });
+  const ob = obraDe(S.rd.obra);
+  const loc = r.meta.local;
+  const dist = loc && ob && ob.latitude !== null && ob.latitude !== undefined && ob.longitude !== null && ob.longitude !== undefined
+    ? distanciaM(loc, { lat: ob.latitude, lon: ob.longitude }) : null;
+  S.rd.fotos.push({
+    id, legenda: '', idServico: '', bytes: blob.size, tiradaEm: r.meta.quando, origem: r.meta.origem,
+    lat: loc ? loc.lat : null, lon: loc ? loc.lon : null, precisao: loc ? loc.precisao : null, origemLocal: r.meta.origemLocal,
+    distanciaObraM: dist, largura: r.cv.width, altura: r.cv.height
+  });
+}
+
+let _logo = null;
+function logoImg() {
+  if (!_logo) _logo = new Promise(ok => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ok(null); i.src = LOGO_NEG; });
+  return _logo;
+}
+function caber(ctx, t, max) {
+  if (ctx.measureText(t).width <= max) return t;
+  while (t.length > 4 && ctx.measureText(t + '…').width > max) t = t.slice(0, -1);
+  return t + '…';
+}
+/** Faixa inferior: logomarca Rijo + obra · data e hora · engenheiro · coordenadas e precisão. */
+async function carimbar(cv, meta) {
+  if (!CFG.CARIMBO_FOTO) return;
+  const ctx = cv.getContext('2d'), w = cv.width, h = cv.height;
+  const fs = Math.max(13, Math.round(w * 0.021));
+  const lh = Math.round(fs * 1.32), mg = Math.round(fs * 0.75);
+  const faixa = lh * 3 + mg * 2, y0 = h - faixa;
+  ctx.fillStyle = 'rgba(11, 42, 32, .84)';
+  ctx.fillRect(0, y0, w, faixa);
+  ctx.fillStyle = '#8CCBA5';
+  ctx.fillRect(0, y0, w, Math.max(2, Math.round(fs * 0.12)));
+  let x = mg;
+  const logo = await logoImg();
+  if (logo) {
+    const alt = Math.round(lh * 2.1), larg = Math.round(alt * logo.width / logo.height);
+    ctx.drawImage(logo, x, Math.round(y0 + (faixa - alt) / 2), larg, alt);
+    x += larg + mg;
+    ctx.fillStyle = 'rgba(255, 255, 255, .3)';
+    ctx.fillRect(x, y0 + mg, Math.max(1, Math.round(fs * 0.06)), faixa - mg * 2);
+    x += mg;
+  }
+  const ob = obraDe(S.rd.obra) || {};
+  const q = new Date(meta.quando);
+  const eng = (S.boot && S.boot.engenheiro && S.boot.engenheiro.nome) || '';
+  const linhas = [
+    `${S.rd.obra} · ${nomeCurto(ob.nome, S.rd.obra)}`,
+    `${q.toLocaleDateString('pt-BR')} ${pad(q.getHours())}:${pad(q.getMinutes())}:${pad(q.getSeconds())}${eng ? ' · ' + eng : ''}`,
+    meta.local ? `Lat ${meta.local.lat.toFixed(6)}   Long ${meta.local.lon.toFixed(6)}${meta.local.precisao ? '   ±' + meta.local.precisao + ' m' : ''}${meta.origemLocal === 'exemplo' ? ' (exemplo)' : ''}`
+      : 'Localização não registrada na foto'
+  ];
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#FFFFFF';
+  linhas.forEach((t, i) => {
+    ctx.font = `${i === 0 ? 700 : 500} ${fs}px Barlow, system-ui, -apple-system, "Segoe UI", sans-serif`;
+    ctx.fillText(caber(ctx, t, w - x - mg), x, Math.round(y0 + mg + lh * i + lh / 2));
+  });
+}
+
+/* foto em pé: o engenheiro escolhe a parte que fica (recorte 4:3 deitado) ou descarta */
+function abrirCorte() { const c = S.cortes[0]; if (c) abrirSheet('corte', { id: c.id, w: c.w, h: c.h, pos: 'meio' }); }
+async function concluirCorte(usar) {
+  const c = S.cortes.shift();
+  const pos = S.sheet ? S.sheet.pos : 'meio';
+  fecharSheet();
+  if (!c) return;
+  const reg = await DB.get('fotos', 'pend-' + c.id);
+  await DB.del('fotos', 'pend-' + c.id); liberarUrl('pend-' + c.id);
+  if (usar && reg) {
+    ocupado('Recortando…');
+    try {
+      const img = await decodificar(new Blob([reg.buf], { type: 'image/jpeg' }));
+      const ch = Math.round(c.w * 3 / 4);
+      const y = pos === 'cima' ? 0 : pos === 'baixo' ? c.h - ch : Math.round((c.h - ch) / 2);
+      const cv = novoCanvas(c.w, ch);
+      cv.getContext('2d').drawImage(img, 0, y, c.w, ch, 0, 0, c.w, ch);
+      if (img.close) img.close();
+      await guardarFoto({ cv, meta: c.meta, id: c.id });
+      toast('Recorte horizontal salvo.');
+    } catch (e) { toast('Não consegui recortar: ' + e.message); }
+    ocupado(false);
+  } else toast('Foto descartada. Tire de novo com o celular deitado.');
+  salvarRd(true); render();
+  if (S.cortes.length) setTimeout(abrirCorte, 350);
+}
+
+function liberarUrl(id) { const u = S.urls.get(id); if (u) { URL.revokeObjectURL(u); S.urls.delete(id); } }
+async function hidratarFotos() {
+  for (const img of document.querySelectorAll('img[data-foto]')) {
+    const id = img.dataset.foto;
+    let u = S.urls.get(id);
+    if (!u) {
+      const reg = await DB.get('fotos', id);
+      if (!reg) continue;
+      u = URL.createObjectURL(new Blob([reg.buf], { type: reg.type || 'image/jpeg' }));
+      S.urls.set(id, u);
+    }
+    if (img.getAttribute('src') !== u) img.src = u;
+  }
+}
+
+/* =====================================================================
+   TELAS
+   ===================================================================== */
+function render() {
+  const app = $('#app');
+  let html = '';
+  switch (S.tela) {
+    case 'acesso': html = telaAcesso(); break;
+    case 'inicio': html = telaInicio(); break;
+    case 'diario': html = telaDiario(); break;
+    case 'fila': html = telaFila(); break;
+    default: html = `<div class="ocupado" style="position:static;min-height:60vh;color:var(--texto-3);background:none">Carregando…</div>`;
+  }
+  app.innerHTML = html;
+  renderSheet();
+  hidratarFotos();
+}
+function renderSuave() { if (S.tela === 'inicio' || S.tela === 'fila') render(); else renderBarra(); }
+function renderBarra() { const el = $('#pilula'); if (el) el.outerHTML = pilula(); }
+
+function pilula() {
+  const n = S.fila.filter(i => ESTADOS_ATIVOS.includes(i.estado)).length;
+  const cls = S.sincronizando ? 'sync' : (S.online ? '' : 'off');
+  const txt = S.sincronizando ? (S.progresso || 'Enviando…') : (n ? `${n} na fila` : (S.online ? 'Em dia' : 'Sem sinal'));
+  return `<button class="pilula ${cls}" id="pilula" data-act="fila" aria-label="Fila de envio">${n && !S.online && !S.sincronizando ? '<span class="ponto"></span>Sem sinal · ' + n : '<span class="ponto"></span>' + esc(txt)}</button>`;
+}
+
+function topo(titulo, sub, voltar, extra) {
+  const marca = titulo ? `<h1>${titulo}${sub ? `<small>${sub}</small>` : ''}</h1>`
+    : `<span class="logo"><img src="${LOGO_NEG}" alt="Rijo Engenharia" width="92" height="34"><span class="logo-div"></span><span class="logo-txt">Diário de Obra</span></span>`;
+  return `<header class="topo"><div class="topo-in">
+    ${voltar ? `<button class="btn-icone" data-act="${voltar}" aria-label="Voltar">${ic('i-voltar', 24)}</button>` : ''}
+    ${marca}${pilula()}</div>${extra || ''}</header>`;
+}
+
+/* ---------- acesso ---------- */
+function telaAcesso() {
+  return topo(null) + `<main>
+    <section class="cartao">
+      <h2>Entre com o seu link pessoal</h2>
+      <p class="mudo" style="margin:0">O escritório enviou um link só seu (WhatsApp ou e-mail). Toque nele, ou copie e cole aqui. No iPhone, depois de pôr o app na tela inicial, cole o link uma vez.</p>
+      ${S.msgAcesso ? `<div class="estado bad">${ic('i-alerta')}<span>${esc(S.msgAcesso)}</span></div>` : ''}
+      <div class="campo"><label for="inpLink">Link ou código de acesso</label>
+        <input type="text" id="inpLink" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://…?t=…"></div>
+      <button class="btn primario cheio" data-act="entrar">Entrar</button>
+    </section></main>`;
+}
+
+/* ---------- início ---------- */
+function telaInicio() {
+  const b = S.boot;
+  if (!b) {
+    return topo(null) + `<main><section class="cartao vazio">${ic('i-sync', 32)}
+      <b>${S.online ? 'Buscando suas obras…' : 'Sem sinal no primeiro acesso'}</b>
+      <span>${S.online ? '' : 'Na primeira vez o app precisa de internet para baixar obras e equipe. Depois funciona sem sinal.'}</span>
+      <button class="btn" data-act="atualizar">Tentar de novo</button></section></main>`;
+  }
+  const h = hoje();
+  const nome = (b.engenheiro && b.engenheiro.nome) || '';
+  let html = topo(null) + '<main>';
+  if (DEMO) html += `<div class="demo-aviso"><b>Demonstração</b> com obras e pessoas de exemplo. Nada aqui vai para a Vobi.</div>`;
+  html += `<div class="saudacao"><b>Olá, ${esc(nome.split(' ').slice(0, 2).join(' '))}</b><span>${dataLonga(h)}</span></div>`;
+  const rejeitados = S.fila.filter(i => i.estado === 'rejeitado');
+  if (rejeitados.length) html += `<button class="estado bad" data-act="fila" style="border:0;text-align:left">${ic('i-alerta')}<span>${rejeitados.length} diário(s) recusado(s) pelo servidor<small>Toque para ver o motivo</small></span></button>`;
+  if (!b.obras.length) html += `<section class="cartao vazio"><b>Nenhuma obra liberada para você</b><span>Peça ao escritório para incluir suas obras na aba Engenheiros.</span></section>`;
+  b.obras.forEach(o => { html += cartaoObra(o, h); });
+  html += `<p class="mudo" style="text-align:center;margin:4px 0">Dados de ${b.geradoEm ? hora(b.geradoEm) : '—'} ·
+    <button class="btn" style="min-height:36px;padding:4px 12px;font-size:14px" data-act="atualizar">${ic('i-sync', 16)} Atualizar</button></p>`;
+  return html + '</main>';
+}
+
+function rotuloSituacao(s, envioVobi) {
+  if (!s) return null;
+  if (s.tipo === 'rascunho') return { cls: 'warn', txt: 'Rascunho em andamento', sub: 'Toque em continuar para terminar' };
+  if (s.tipo === 'fila') {
+    const it = s.it;
+    if (it.estado === 'pendente' || it.estado === 'fotos') {
+      const n = it.fotos.filter(f => !f.enviada).length;
+      return { cls: 'warn', txt: 'Guardado no celular', sub: n ? `Falta enviar o diário e ${n} foto(s)` : 'Aguardando sinal para enviar' };
+    }
+    if (it.estado === 'rejeitado') return { cls: 'bad', txt: 'Recusado pelo servidor', sub: it.erro };
+    const sv = it.servidor || {};
+    if (sv.status === 'enviado') return { cls: 'ok', txt: `Na Vobi · RDO nº ${sv.codigoVobi}`, sub: 'Enviado e conferido' };
+    if (sv.status === 'erro') return { cls: 'bad', txt: 'Recebido, com erro na Vobi', sub: 'O escritório já foi avisado' };
+    return { cls: 'info', txt: 'Recebido pelo servidor', sub: sv.envioVobi === false ? 'Envio à Vobi ainda desligado (fase de teste)' : 'Indo para a Vobi' };
+  }
+  const d = s.d;
+  if (d.status === 'enviado') return { cls: 'ok', txt: `Na Vobi · RDO nº ${d.codigo}`, sub: d.origem === 'vobi' ? 'Lançado direto na Vobi' : (d.engenheiro ? 'Por ' + d.engenheiro : '') };
+  if (d.status === 'erro') return { cls: 'bad', txt: 'Erro ao enviar à Vobi', sub: d.erro || 'O escritório já foi avisado' };
+  return { cls: 'info', txt: 'Recebido pelo servidor', sub: envioVobi === false ? 'Envio à Vobi ainda desligado (fase de teste)' : 'Indo para a Vobi' };
+}
+
+function cartaoObra(o, h) {
+  const s = situacaoDia(o.codigo, h);
+  const rot = rotuloSituacao(s, o.envioVobi);
+  const ult = o.diarios.find(d => d.data < h && d.codigo);
+  const falt = diasFaltando(o.codigo);
+  const est = estadoObra(o.codigo);
+  let html = `<section class="cartao">
+    <div class="obra-cab"><span class="cod">${esc(o.codigo)}</span><span class="obra-nome">${esc(nomeCurto(o.nome, o.codigo))}</span></div>
+    <div class="mudo">${est.equipe.length} na equipe${o.cidade ? ' · ' + esc(o.cidade) : ''}</div>`;
+  html += rot ? `<div class="estado ${rot.cls}">${ic(rot.cls === 'ok' ? 'i-check' : rot.cls === 'bad' ? 'i-alerta' : 'i-relogio')}<span>Hoje: ${esc(rot.txt)}<small>${esc(rot.sub || '')}</small></span></div>`
+    : `<div class="estado bad">${ic('i-alerta')}<span>Hoje: diário pendente<small>${ult ? `Último: ${br(ult.data)} (nº ${esc(ult.codigo)})` : 'Nenhum diário recente'}</small></span></div>`;
+  if (!s) html += `<button class="btn primario cheio" data-act="abrir" data-obra="${esc(o.codigo)}" data-data="${h}">${ic('i-mais')} Lançar diário de hoje</button>`;
+  else if (s.tipo === 'rascunho') html += `<button class="btn sinal cheio" data-act="abrir" data-obra="${esc(o.codigo)}" data-data="${h}">Continuar rascunho ${ic('i-seta')}</button>`;
+  if (falt.length) {
+    html += `<div class="campo"><span class="rotulo">Dias sem diário</span><div class="chips">${falt.map(d =>
+      `<button class="chip" data-act="abrir" data-obra="${esc(o.codigo)}" data-data="${d}">${S.rascunhos[o.codigo + '|' + d] ? '✎ ' : ''}${NOME_DIA[diaSemana(d)]} ${br(d)}</button>`).join('')}</div></div>`;
+  }
+  html += `<button class="btn" style="min-height:40px;font-size:14px;justify-self:start" data-act="outraData" data-obra="${esc(o.codigo)}">Outra data…</button>`;
+  return html + '</section>';
+}
+
+function nomeCurto(nome, cod) {
+  const s = String(nome || '');
+  return s.indexOf('|') >= 0 ? s.split('|').slice(1).join('|').trim() : (s || cod);
+}
+
+/* ---------- fila ---------- */
+function telaFila() {
+  const itens = S.fila.slice().sort((a, b) => b.criadoEm.localeCompare(a.criadoEm));
+  let html = topo('Envios', 'O que saiu deste celular', 'inicio') + '<main>';
+  html += `<section class="cartao"><div class="linha"><div class="cresce"><h3>${S.online ? 'Com conexão' : 'Sem sinal agora'}</h3>
+    <span class="mudo">${S.ultimaSync ? 'Última sincronização às ' + hora(S.ultimaSync) : 'Ainda não sincronizou'}</span></div>
+    <button class="btn" data-act="sincronizar" ${S.sincronizando ? 'disabled' : ''}>${ic('i-sync', 18)} Enviar agora</button></div>
+    ${S.erroSync ? `<div class="estado warn">${ic('i-alerta')}<span>${esc(S.erroSync)}<small>O app tenta de novo sozinho a cada minuto com o app aberto.</small></span></div>` : ''}
+    <p class="mudo" style="margin:0">Deixe o app aberto alguns instantes quando pegar sinal: diário e fotos sobem sozinhos.</p></section>`;
+  if (!itens.length) html += `<section class="cartao vazio"><b>Nada enviado deste celular ainda</b></section>`;
+  itens.forEach(it => {
+    const rot = rotuloSituacao({ tipo: 'fila', it });
+    const env = it.fotos.filter(f => f.enviada).length;
+    html += `<section class="cartao"><div class="linha"><span class="cod p">${esc(it.obra)}</span><b class="cresce">${dataLonga(it.data)}</b></div>
+      <div class="estado ${rot.cls}">${ic(rot.cls === 'ok' ? 'i-check' : rot.cls === 'bad' ? 'i-alerta' : 'i-relogio')}<span>${esc(rot.txt)}<small>${esc(rot.sub || '')}</small></span></div>
+      <div class="mudo num">Fotos enviadas: ${env} de ${it.fotos.length}${it.erro && it.estado !== 'rejeitado' ? ' · último erro: ' + esc(it.erro) : ''}</div>
+      ${(it.servidor && it.servidor.avisos && it.servidor.avisos.length) ? `<div class="mudo">${esc([].concat(it.servidor.avisos).join(' · '))}</div>` : ''}
+      ${it.estado === 'rejeitado' ? `<button class="btn perigo" data-act="descartarItem" data-id="${it.id}">${ic('i-lixo', 18)} Tirar da fila</button>` : ''}
+    </section>`;
+  });
+  return html + '</main>';
+}
+
+/* ---------- diário ---------- */
+function telaDiario() {
+  const rd = S.rd;
+  const ob = obraDe(rd.obra) || { nome: rd.obra };
+  const passos = `<nav class="passos" aria-label="Etapas">${PASSOS.map((p, i) => `<button class="passo" data-act="passo" data-n="${i}" ${i === S.passo ? 'aria-current="step"' : ''}>
+    ${passoFeito(i, rd) ? `<span class="feito">${ic('i-check', 12)}</span>` : ''}${p.nome}</button>`).join('')}</nav>`;
+  let html = topo(`${esc(rd.obra)} · ${br(rd.data)}`, esc(nomeCurto(ob.nome, rd.obra)), 'sair', passos) + '<main>';
+  const id = PASSOS[S.passo].id;
+  html += ({ clima: passoClima, equipe: passoEquipe, servicos: passoServicos, fotos: passoFotos, ocorrencias: passoOcorrencias, revisar: passoRevisar })[id](rd);
+  html += '</main>';
+  const ultimo = S.passo === PASSOS.length - 1;
+  html += `<div class="rodape">${S.passo > 0 ? `<button class="btn" data-act="passo" data-n="${S.passo - 1}">${ic('i-voltar', 20)} Voltar</button>` : `<button class="btn" data-act="sair">Sair</button>`}
+    ${ultimo ? `<button class="btn primario" data-act="enviar" ${pendencias(rd).bloq.length ? 'disabled' : ''}>Enviar diário</button>`
+      : `<button class="btn primario" data-act="proximo">Próximo ${ic('i-seta', 20)}</button>`}</div>`;
+  return html;
+}
+
+function passoClima(rd) {
+  const algumSug = PERIODOS.some(p => rd.clima[p.id].sugerido);
+  let html = `<div class="saudacao"><b>Como estava o tempo?</b><span>${dataLonga(rd.data)}</span></div>`;
+  if (algumSug) html += `<div class="sugestao">${ic('i-relogio', 16)} Pré-marcado pela previsão do tempo da cidade da obra. Confira.</div>`;
+  PERIODOS.forEach(p => {
+    const c = rd.clima[p.id];
+    html += `<section class="cartao periodo ${c.checked ? '' : 'desligado'}">
+      <div class="periodo-topo"><h2>${p.nome}</h2>
+        <label class="liga"><input type="checkbox" data-bind="climaCheck" data-p="${p.id}" ${c.checked ? 'checked' : ''}> Registrar</label></div>
+      <div class="tempos" role="group" aria-label="Tempo ${p.nome}">${TEMPOS.map(t => `<button class="tempo" data-act="tempo" data-p="${p.id}" data-v="${t.id}" aria-pressed="${c.weather === t.id}">${ic(t.icone, 30)}${t.nome}</button>`).join('')}</div>
+      <div class="condicoes" role="group" aria-label="Condição de trabalho ${p.nome}">
+        <button class="condicao pra" data-act="condicao" data-p="${p.id}" data-v="practicable" aria-pressed="${c.status === 'practicable'}">Praticável</button>
+        <button class="condicao imp" data-act="condicao" data-p="${p.id}" data-v="impractical" aria-pressed="${c.status === 'impractical'}">Impraticável</button></div>
+      ${c.sugerido && c.chuvaMm !== null && c.chuvaMm !== undefined ? `<div class="sugestao">Previsão: ${String(c.chuvaMm).replace('.', ',')} mm de chuva no período</div>` : ''}
+    </section>`;
+  });
+  return html;
+}
+
+function passoEquipe(rd) {
+  const ativos = rd.equipe.filter(c => !c.saida);
+  const pres = ativos.filter(c => c.presente).length;
+  const movs = rd.equipe.filter(c => c.novo || c.chegada || c.saida).length;
+  let html = `<section class="cartao"><div class="efetivo">
+      <div><b>${pres}</b><span>presentes</span></div><div class="f"><b>${ativos.length - pres}</b><span>faltaram</span></div><div><b>${movs}</b><span>entradas/saídas</span></div></div>
+    <div class="linha"><span class="mudo cresce">Pré-preenchido com quem está alocado na obra. Marque só quem faltou.</span>
+    <button class="btn" style="min-height:40px;font-size:14px" data-act="todosPresentes">Todos presentes</button></div></section>`;
+  html += `<section class="cartao"><div class="pessoas">`;
+  if (!rd.equipe.length) html += `<div class="vazio"><b>Nenhum colaborador alocado nesta obra</b><span>Cadastre a equipe abaixo. Amanhã ela já vem preenchida.</span></div>`;
+  rd.equipe.forEach((c, i) => {
+    const v0 = Object.assign({}, c, c.atualizacao || {});
+    const incompleto = !c.novo && (!v0.telefone || !v0.documento);
+    const marcas = (c.novo ? '<span class="etq nova">novo</span>' : '') + (c.chegada ? '<span class="etq">chegou</span>' : '') + (c.alojado ? '<span class="etq">alojado</span>' : '') +
+      (incompleto ? '<span class="etq aviso">completar cadastro</span>' : '');
+    const desde = c.inicio ? `na obra desde ${br(c.inicio)}` : '';
+    const sub = [c.funcao, desde, c.vinculo === 'Empreiteiro' && c.empresa ? c.empresa : ''].filter(Boolean).join(' · ');
+    if (c.saida) {
+      const m = ((S.boot && S.boot.motivosSaida) || []).find(x => x.id === c.saida.motivo);
+      html += `<div class="pessoa saiu"><div class="pessoa-topo"><div class="pessoa-nome"><b>${esc(c.nome)}</b><span>${esc(sub)}</span></div></div>
+        <div class="saida-info">Saída em ${br(c.saida.data)}: ${esc(m ? m.nome : c.saida.motivo)}${c.saida.obraDestino ? ' → ' + esc(c.saida.obraDestino) : ''}
+        <button class="chip" data-act="desfazerSaida" data-i="${i}">Desfazer</button></div></div>`;
+      return;
+    }
+    html += `<div class="pessoa"><div class="pessoa-topo">
+        <div class="pessoa-nome"><b>${esc(c.nome)}${marcas}</b><span>${esc(sub)}</span></div>
+        <div class="pres" role="group" aria-label="Presença de ${esc(c.nome)}">
+          <button class="p" data-act="presenca" data-i="${i}" data-v="1" aria-pressed="${!!c.presente}">P</button>
+          <button class="f" data-act="presenca" data-i="${i}" data-v="0" aria-pressed="${!c.presente}">F</button></div>
+        <button class="btn-icone" data-act="menuPessoa" data-i="${i}" aria-label="Mais opções para ${esc(c.nome)}">${ic('i-mais-v')}</button>
+      </div>
+      ${c.presente ? '' : `<div class="chips">${((S.boot && S.boot.motivosFalta) || ['Falta']).map(m => `<button class="chip falta" data-act="motivo" data-i="${i}" data-v="${esc(m)}" aria-pressed="${(c.motivoFalta || 'Falta') === m}">${esc(m)}</button>`).join('')}</div>`}
+    </div>`;
+  });
+  html += `</div></section>
+    <div class="botoes-foto"><button class="btn" data-act="novoColab">${ic('i-mais')} Cadastrar novo</button>
+    <button class="btn" data-act="trazer">${ic('i-pessoas')} Trazer de outra obra</button></div>`;
+  return html;
+}
+
+function passoServicos(rd) {
+  let html = `<div class="saudacao"><b>Serviços em andamento</b><span>Ajuste o percentual de cada serviço e marque o que foi feito no dia.</span></div><section class="cartao">`;
+  if (!rd.servicos.length) html += `<div class="vazio"><b>Nenhum serviço cadastrado nesta obra</b><span>Cadastre os serviços (ex.: Alvenaria do 1º pavimento). Eles ficam salvos para os próximos dias.</span></div>`;
+  rd.servicos.forEach((s, i) => {
+    const subiu = s.percentual > s.anterior;
+    html += `<div class="servico">
+      <div class="servico-topo"><b>${esc(s.nome)}${s.novo ? '<span class="etq nova">novo</span>' : ''}</b>
+        <span class="pct ${subiu ? 'subiu' : ''}" id="pct-${i}">${s.percentual}<small>%</small></span></div>
+      <div class="barra-pct"><button data-act="pctMenos" data-i="${i}" aria-label="Diminuir 5%">−5</button>
+        <input type="range" min="0" max="100" step="5" value="${s.percentual}" data-bind="pct" data-i="${i}" aria-label="Percentual de ${esc(s.nome)}">
+        <button data-act="pctMais" data-i="${i}" aria-label="Aumentar 5%">+5</button></div>
+      <div class="linha"><span class="antes cresce">Antes: ${s.anterior}%${s.percentual < s.anterior ? ' · <b style="color:var(--cli)">diminuiu</b>' : ''}</span>
+        <label class="liga"><input type="checkbox" data-bind="trabalhou" data-i="${i}" ${s.trabalhou ? 'checked' : ''}> Trabalhou hoje</label></div>
+      <input type="text" data-bind="obsServ" data-i="${i}" value="${esc(s.obs)}" placeholder="Observação (opcional)" aria-label="Observação de ${esc(s.nome)}">
+    </div>`;
+  });
+  html += `</section><button class="btn cheio" data-act="novoServico">${ic('i-mais')} Novo serviço</button>`;
+  if (rd.concluidos) html += `<p class="mudo" style="margin:0;text-align:center">${rd.concluidos} serviço(s) já concluído(s) nesta obra não aparecem aqui.</p>`;
+  return html;
+}
+
+function metaFoto(f) {
+  const q = f.tiradaEm ? new Date(f.tiradaEm) : null;
+  const p = [];
+  if (q) p.push(`<span>${q.toLocaleDateString('pt-BR')} ${pad(q.getHours())}:${pad(q.getMinutes())}</span>`);
+  if (f.lat === null || f.lat === undefined) p.push('<span class="warn">sem localização</span>');
+  else if (f.distanciaObraM !== null && f.distanciaObraM !== undefined && f.distanciaObraM > raioObra()) p.push(`<span class="bad">a ${distTxt(f.distanciaObraM)} da obra</span>`);
+  else p.push(`<span class="ok">${ic('i-pin', 14)} georreferenciada${f.precisao ? ' ±' + f.precisao + ' m' : ''}</span>`);
+  return `<div class="foto-meta">${p.join('')}</div>`;
+}
+
+function passoFotos(rd) {
+  iniciarGPS();
+  const total = rd.fotos.reduce((s, f) => s + (f.bytes || 0), 0);
+  let html = `<section class="cartao"><div class="orienta">${ic('i-deitado', 54)}<div><b>Celular deitado, sempre</b>
+      <span>Foto horizontal, como nos relatórios fotográficos da Caixa e da fiscalização. Foto em pé é recortada ou descartada.</span></div></div>
+    ${htmlGps()}</section>
+    <div class="botoes-foto">
+    <button class="btn primario" data-act="camera">${ic('i-camera', 28)} Tirar foto</button>
+    <button class="btn" data-act="galeria">${ic('i-galeria', 28)} Da galeria</button></div>
+    <p class="mudo" style="margin:0">${rd.fotos.length ? `${rd.fotos.length} foto(s) · ${mb(total)} · ` : ''}Cada foto sai com a marca Rijo, a obra, data, hora e coordenadas. Ficam no celular até o envio.</p>`;
+  if (!rd.fotos.length) return html + `<section class="cartao vazio">${ic('i-camera', 36)}<b>Nenhuma foto ainda</b><span>Fotografe os serviços do dia: frente de trabalho, detalhes, problemas. Use "Tirar foto" para a foto sair georreferenciada.</span></section>`;
+  const servs = rd.servicos;
+  html += `<section class="cartao"><div class="grade-fotos">${rd.fotos.map((f, i) => `<div class="foto">
+      <div class="foto-img"><img data-foto="${f.id}" alt="Foto ${i + 1}"><span class="n">${i + 1}</span>
+        <button class="rm" data-act="rmFoto" data-i="${i}" aria-label="Remover foto ${i + 1}">${ic('i-x', 18)}</button></div>
+      ${metaFoto(f)}
+      <input type="text" data-bind="legenda" data-i="${i}" value="${esc(f.legenda)}" placeholder="Legenda (ex.: alvenaria eixo B)" aria-label="Legenda da foto ${i + 1}">
+      ${servs.length ? `<select data-bind="fotoServ" data-i="${i}" aria-label="Serviço da foto ${i + 1}"><option value="">Serviço (opcional)</option>${servs.map(s => `<option value="${esc(s.id)}" ${f.idServico === s.id ? 'selected' : ''}>${esc(s.nome)}</option>`).join('')}</select>` : ''}
+    </div>`).join('')}</div></section>`;
+  return html;
+}
+
+function passoOcorrencias(rd) {
+  return `<div class="saudacao"><b>Ocorrências e observações</b><span>Visitas, entregas, paralisações, problemas. Toque nos atalhos para começar a linha.</span></div>
+    <section class="cartao"><div class="chips">${ATALHOS_OCORRENCIA.map(a => `<button class="chip" data-act="atalho" data-v="${esc(a)}">${esc(a)}</button>`).join('')}</div>
+    <textarea id="txtOcorr" data-bind="ocorrencias" placeholder="Ex.: Entrega de 8 m³ de concreto às 10h. Chuva forte das 14h às 15h30 parou a alvenaria.">${esc(rd.ocorrencias)}</textarea>
+    <label class="liga"><input type="checkbox" data-bind="semOcorr" ${rd.semOcorrencias ? 'checked' : ''}> Sem ocorrências neste dia</label></section>`;
+}
+
+function passoRevisar(rd) {
+  const p = pendencias(rd);
+  const ativos = rd.equipe.filter(c => !c.saida);
+  const pres = ativos.filter(c => c.presente).length;
+  const clima = PERIODOS.filter(x => rd.clima[x.id].checked).map(x => {
+    const c = rd.clima[x.id]; const t = TEMPOS.find(t => t.id === c.weather);
+    return `${x.nome}: ${t ? t.nome : '—'}${c.status === 'impractical' ? ' (impraticável)' : ''}`;
+  }).join(' · ') || '—';
+  const serv = rd.servicos.filter(s => s.trabalhou || s.percentual !== s.anterior || s.novo);
+  const movs = rd.equipe.filter(c => c.novo || c.chegada || c.saida);
+  let html = `<div class="saudacao"><b>Revisar e enviar</b><span>${esc(rd.obra)} · ${dataLonga(rd.data)}</span></div>`;
+  if (p.bloq.length || p.avisos.length) {
+    html += `<section class="cartao pend">${p.bloq.map(x => `<button class="estado bad" style="border:0;text-align:left" data-act="passo" data-n="${x.passo}">${ic('i-alerta')}<span>${esc(x.txt)}<small>Obrigatório · toque para corrigir</small></span></button>`).join('')}
+      ${p.avisos.map(x => `<button class="estado warn" style="border:0;text-align:left" data-act="passo" data-n="${x.passo}">${ic('i-alerta')}<span>${esc(x.txt)}<small>Toque para ajustar, ou envie assim</small></span></button>`).join('')}</section>`;
+  } else html += `<div class="estado ok">${ic('i-check')}<span>Tudo preenchido</span></div>`;
+  html += `<section class="cartao resumo">
+    <div class="resumo-linha"><span>Clima</span><b>${esc(clima)}</b></div>
+    <div class="resumo-linha"><span>Efetivo</span><b class="num">${pres} presente${pres === 1 ? '' : 's'} · ${ativos.length - pres} falta${ativos.length - pres === 1 ? '' : 's'}</b></div>
+    ${movs.length ? `<div class="resumo-linha"><span>Movimentação</span><b>${movs.map(c => esc(c.nome.split(' ')[0]) + (c.saida ? ' (saiu)' : c.novo ? ' (novo)' : ' (chegou)')).join(', ')}</b></div>` : ''}
+    <div class="resumo-linha"><span>Serviços</span><b>${serv.length ? serv.map(s => `${esc(s.nome)}: ${s.anterior}→${s.percentual}%`).join('<br>') : 'nenhum atualizado'}</b></div>
+    <div class="resumo-linha"><span>Fotos</span><b class="num">${rd.fotos.length}</b></div>
+    <div class="resumo-linha"><span>Ocorrências</span><b>${rd.ocorrencias.trim() ? esc(rd.ocorrencias.trim().slice(0, 140)) + (rd.ocorrencias.trim().length > 140 ? '…' : '') : (rd.semOcorrencias ? 'sem ocorrências' : '—')}</b></div>
+  </section>`;
+  if (rd.fotos.length) html += `<div class="tira">${rd.fotos.map(f => `<img data-foto="${f.id}" alt="">`).join('')}</div>`;
+  html += `<p class="mudo" style="margin:0">Ao enviar, o diário fica guardado no celular e sobe sozinho quando houver sinal. Na Vobi ele entra como <b>Concluído</b>, com número automático.</p>
+    <button class="btn perigo" data-act="descartar">${ic('i-lixo', 18)} Descartar rascunho</button>`;
+  return html;
+}
+
+/* =====================================================================
+   FOLHAS (cadastro, saída, trazer, novo serviço, outra data, confirmações)
+   ===================================================================== */
+function abrirSheet(tipo, dados) { S.sheet = Object.assign({ tipo }, dados || {}); history.pushState({ sheet: true }, ''); renderSheet(); }
+function fecharSheet(viaHistorico) {
+  if (!S.sheet) return;
+  S.sheet = null; renderSheet();
+  if (!viaHistorico) { S.ignorarPop = true; history.back(); }
+}
+
+function renderSheet() {
+  const el = $('#sheet');
+  if (!S.sheet) { el.hidden = true; el.innerHTML = ''; return; }
+  const f = { pessoa: folhaPessoa, cadastro: folhaCadastro, saida: folhaSaida, trazer: folhaTrazer, servico: folhaServico, outraData: folhaOutraData, confirmar: folhaConfirmar, descartar: folhaDescartar, corte: folhaCorte }[S.sheet.tipo];
+  el.innerHTML = `<div class="folha" role="dialog" aria-modal="true"><div class="folha-alca"></div>${f(S.sheet)}</div>`;
+  el.hidden = false;
+  const foco = el.querySelector('[data-foco]'); if (foco) setTimeout(() => foco.focus(), 50);
+  hidratarFotos();
+}
+const cab = t => `<div class="folha-topo"><h2>${t}</h2><button class="btn-icone" data-act="fecharSheet" aria-label="Fechar">${ic('i-x')}</button></div>`;
+
+function folhaPessoa(sh) {
+  const c = S.rd.equipe[sh.i];
+  return cab(esc(c.nome)) + `<div class="mudo">${esc([c.funcao, c.telefone].filter(Boolean).join(' · '))}${c.alojado ? ' · alojado' + (c.alojamento ? ' em ' + esc(c.alojamento) : '') : ''}</div>
+    <div class="lista-sel">
+      <button class="item-sel" data-act="abrirSaida" data-i="${sh.i}">${ic('i-seta')}<span class="cresce">Saiu da obra<small>Transferência para outra obra, fim do serviço, demissão…</small></span></button>
+      <button class="item-sel" data-act="abrirEditar" data-i="${sh.i}">${ic('i-pessoas')}<span class="cresce">${c.novo ? 'Corrigir cadastro' : 'Atualizar cadastro'}<small>Telefone, documento, função, alojamento</small></span></button>
+      ${(c.novo || c.chegada) ? `<button class="item-sel" data-act="removerPessoa" data-i="${sh.i}">${ic('i-lixo')}<span class="cresce">Tirar da lista<small>Lançado por engano neste diário</small></span></button>` : ''}
+    </div>`;
+}
+
+function campo(id, rot, valor, extra) {
+  extra = extra || {};
+  return `<div class="campo"><label for="${id}">${rot}${extra.obrig ? ' *' : ''}</label>
+    <input type="${extra.tipo || 'text'}" id="${id}" value="${esc(valor || '')}" ${extra.attrs || ''}>${extra.dica ? `<span class="dica">${extra.dica}</span>` : ''}<span class="erro" id="${id}-erro" hidden></span></div>`;
+}
+
+function folhaCadastro(sh) {
+  const b = S.boot || {};
+  const c = sh.i !== undefined ? S.rd.equipe[sh.i] : { inicio: S.rd.data, alojado: null, vinculo: '' };
+  const v = Object.assign({}, c, c.atualizacao || {});
+  const funcoes = b.funcoes || [];
+  const outraFuncao = v.funcao && !funcoes.includes(v.funcao);
+  const editandoExistente = sh.i !== undefined && !c.novo;
+  return cab(sh.i === undefined ? 'Novo colaborador' : (c.novo ? 'Corrigir cadastro' : 'Atualizar cadastro')) +
+    (sh.i === undefined ? `<p class="mudo" style="margin:0">Primeira vez na Rijo? Preencha tudo uma vez só. Nos próximos dias ele já aparece na lista.</p>` : '') +
+    (editandoExistente ? `<div class="mudo"><b>${esc(c.nome)}</b></div>` : campo('fNome', 'Nome completo', v.nome, { obrig: true, attrs: 'data-foco autocomplete="off" autocapitalize="words"' })) +
+    `<div class="campo"><label for="fFuncao">Função *</label><select id="fFuncao"><option value="">Escolha…</option>
+      ${funcoes.map(f => `<option ${v.funcao === f ? 'selected' : ''}>${esc(f)}</option>`).join('')}<option value="__outra" ${outraFuncao ? 'selected' : ''}>Outra…</option></select>
+      <input type="text" id="fFuncaoOutra" placeholder="Qual função?" value="${outraFuncao ? esc(v.funcao) : ''}" ${outraFuncao ? '' : 'hidden'}><span class="erro" id="fFuncao-erro" hidden></span></div>` +
+    (editandoExistente ? '' : campo('fInicio', 'Na obra desde', v.inicio, { obrig: true, tipo: 'date', attrs: `max="${S.rd.data}"` })) +
+    campo('fTel', 'Telefone', v.telefone, { obrig: true, tipo: 'tel', attrs: 'inputmode="tel" autocomplete="off" placeholder="(81) 9 9999-9999"' }) +
+    campo('fDoc', 'Documento (CPF ou RG)', v.documento, { obrig: true, attrs: 'autocomplete="off"', dica: 'Fica só na base interna. Não vai para o diário da Vobi.' }) +
+    `<div class="campo"><span class="rotulo-campo">Vínculo *</span><div class="chips" id="fVinculo">${((b.vinculos) || []).map(x => `<button class="chip" data-act="selVinculo" data-v="${esc(x)}" aria-pressed="${v.vinculo === x}">${esc(x)}</button>`).join('')}</div><span class="erro" id="fVinculo-erro" hidden></span></div>` +
+    `<div id="boxEmpresa" ${['Empreiteiro', 'Outro'].includes(v.vinculo) ? '' : 'hidden'}>${campo('fEmpresa', 'Empresa / empreiteiro', v.empresa, { attrs: 'autocomplete="off"' })}</div>` +
+    `<div class="campo"><span class="rotulo-campo">Está alojado? *</span><div class="chips" id="fAlojado">
+      <button class="chip" data-act="selAlojado" data-v="1" aria-pressed="${v.alojado === true}">Sim</button>
+      <button class="chip" data-act="selAlojado" data-v="0" aria-pressed="${v.alojado === false}">Não</button></div><span class="erro" id="fAlojado-erro" hidden></span></div>` +
+    `<div class="campo" id="boxAloj" ${v.alojado ? '' : 'hidden'}><label for="fAloj">Qual alojamento? *</label>
+      <input type="text" id="fAloj" list="listaAloj" value="${esc(v.alojamento || '')}" autocomplete="off" placeholder="Nome ou endereço do alojamento">
+      <datalist id="listaAloj">${(b.alojamentos || []).map(a => `<option value="${esc(a)}">`).join('')}</datalist><span class="erro" id="fAloj-erro" hidden></span></div>` +
+    `<div class="folha-acoes"><button class="btn" data-act="fecharSheet">Cancelar</button><button class="btn primario" data-act="salvarCadastro">Salvar</button></div>`;
+}
+
+function folhaSaida(sh) {
+  const c = S.rd.equipe[sh.i];
+  const b = S.boot || {};
+  const destinos = (b.obrasDestino || []).filter(o => o.codigo !== S.rd.obra);
+  const mot = sh.motivo || '';
+  return cab('Saída da obra') + `<div class="mudo"><b>${esc(c.nome)}</b> · ${esc(c.funcao)}</div>
+    ${campo('fDataSaida', 'Data da saída', sh.data || S.rd.data, { tipo: 'date', attrs: `max="${hoje()}"` })}
+    <div class="campo"><span class="rotulo-campo">Motivo *</span><div class="lista-sel">${(b.motivosSaida || []).map(m => `<button class="item-sel" data-act="selMotivoSaida" data-v="${m.id}" aria-pressed="${mot === m.id}">${esc(m.nome)}</button>`).join('')}</div><span class="erro" id="fMotivo-erro" hidden></span></div>
+    <div class="campo" ${mot === 'transferencia' ? '' : 'hidden'}><label for="fDestino">Para qual obra? *</label><select id="fDestino"><option value="">Escolha…</option>
+      ${destinos.map(o => `<option value="${esc(o.codigo)}" ${sh.destino === o.codigo ? 'selected' : ''}>${esc(o.codigo)} · ${esc(nomeCurto(o.nome, o.codigo))}</option>`).join('')}</select><span class="erro" id="fDestino-erro" hidden></span></div>
+    ${campo('fDetalhe', 'Detalhe (opcional)', sh.detalhe || '', { attrs: 'autocomplete="off" placeholder="Ex.: terminou a alvenaria; volta em novembro"' })}
+    <div class="folha-acoes"><button class="btn" data-act="fecharSheet">Cancelar</button><button class="btn primario" data-act="salvarSaida">Registrar saída</button></div>`;
+}
+
+function folhaTrazer(sh) {
+  const naLista = new Set(S.rd.equipe.map(c => c.id));
+  const q = (sh.q || '').trim().toLowerCase();
+  const lista = ((S.boot && S.boot.outrosColaboradores) || []).filter(c => !naLista.has(c.id) && (!q || String(c.nome).toLowerCase().includes(q) || String(c.funcao).toLowerCase().includes(q))).slice(0, 60);
+  const sel = sh.sel ? (S.boot.outrosColaboradores || []).find(c => c.id === sh.sel) : null;
+  return cab('Trazer de outra obra') +
+    `<p class="mudo" style="margin:0">Quem já é cadastrado na Rijo (em outra obra ou que já trabalhou antes). Quem é novo, use "Cadastrar novo".</p>
+    <input type="search" id="fBusca" data-bind="busca" value="${esc(sh.q || '')}" placeholder="Buscar por nome ou função" autocomplete="off" data-foco>
+    <div class="lista-sel">${lista.length ? lista.map(c => `<button class="item-sel" data-act="selTrazer" data-v="${esc(c.id)}" aria-pressed="${sh.sel === c.id}">${ic('i-pessoas')}<span class="cresce">${esc(c.nome)}<small>${esc(c.funcao)} · ${c.situacao === 'desligado' ? 'já trabalhou na Rijo' : 'hoje em ' + esc(c.obraAtual)}</small></span></button>`).join('')
+      : '<div class="vazio">Ninguém encontrado.</div>'}</div>
+    ${sel ? campo('fInicioTrazer', `${esc(sel.nome.split(' ')[0])} está na obra desde`, S.rd.data, { tipo: 'date', attrs: `max="${S.rd.data}"` }) : ''}
+    <div class="folha-acoes"><button class="btn" data-act="fecharSheet">Cancelar</button><button class="btn primario" data-act="salvarTrazer" ${sel ? '' : 'disabled'}>Incluir na equipe</button></div>`;
+}
+
+function folhaServico() {
+  return cab('Novo serviço') + `<p class="mudo" style="margin:0">Fica salvo nesta obra para os próximos diários.</p>
+    ${campo('fServNome', 'Nome do serviço', '', { obrig: true, attrs: 'data-foco autocomplete="off" placeholder="Ex.: Alvenaria do 1º pavimento"' })}
+    ${campo('fServPct', 'Percentual atual (%)', '0', { tipo: 'text', attrs: 'inputmode="numeric" pattern="[0-9]*"' })}
+    <div class="folha-acoes"><button class="btn" data-act="fecharSheet">Cancelar</button><button class="btn primario" data-act="salvarServico">Incluir</button></div>`;
+}
+
+function folhaOutraData(sh) {
+  const max = (S.boot && S.boot.config && S.boot.config.maxDiasAtras) || 45;
+  return cab('Diário de outra data') + `<div class="mudo"><span class="cod p">${esc(sh.obra)}</span></div>
+    ${campo('fOutraData', 'Data do diário', somaDias(hoje(), -1), { tipo: 'date', attrs: `max="${hoje()}" min="${somaDias(hoje(), -max)}" data-foco` })}
+    <div class="folha-acoes"><button class="btn" data-act="fecharSheet">Cancelar</button><button class="btn primario" data-act="abrirOutraData">Abrir</button></div>`;
+}
+
+function folhaConfirmar() {
+  const p = pendencias(S.rd);
+  return cab('Enviar assim mesmo?') + `<div class="pend">${p.avisos.map(x => `<div class="estado warn">${ic('i-alerta')}<span>${esc(x.txt)}</span></div>`).join('')}</div>
+    <p class="mudo" style="margin:0">Essas faltas aparecem no painel do escritório.</p>
+    <div class="folha-acoes"><button class="btn" data-act="fecharSheet">Voltar e ajustar</button><button class="btn primario" data-act="enviarConfirmado">Enviar</button></div>`;
+}
+
+function folhaCorte(sh) {
+  const hp = Math.min(100, (sh.w * 0.75) / sh.h * 100);
+  const top = sh.pos === 'cima' ? 0 : sh.pos === 'baixo' ? 100 - hp : (100 - hp) / 2;
+  const resto = S.cortes.length > 1 ? `<span class="mudo">Mais ${S.cortes.length - 1} foto(s) em pé depois desta.</span>` : '';
+  return cab('Foto em pé') + `<p class="mudo" style="margin:0">Relatórios da Caixa e da fiscalização pedem foto <b>deitada (horizontal)</b>. Escolha a parte que fica, ou descarte e tire de novo com o celular deitado.</p>
+    <div class="corte" style="aspect-ratio:${sh.w} / ${sh.h};width:min(100%, calc(52vh * ${(sh.w / sh.h).toFixed(4)}))"><img data-foto="pend-${sh.id}" alt="Foto em pé"><div class="corte-quadro" style="top:${top.toFixed(2)}%;height:${hp.toFixed(2)}%"></div></div>
+    <div class="chips" role="group" aria-label="Parte da foto que fica">${[['cima', 'Parte de cima'], ['meio', 'Meio'], ['baixo', 'Parte de baixo']].map(([k, t]) => `<button class="chip" data-act="posCorte" data-v="${k}" aria-pressed="${sh.pos === k}">${t}</button>`).join('')}</div>
+    ${resto}
+    <div class="folha-acoes"><button class="btn perigo" data-act="corteDescartar">Descartar</button><button class="btn primario" data-act="corteUsar">Usar recorte</button></div>`;
+}
+
+function folhaDescartar() {
+  return cab('Descartar rascunho?') + `<p style="margin:0">Apaga o que foi lançado neste diário, inclusive as ${S.rd.fotos.length} foto(s). Não dá para desfazer.</p>
+    <div class="folha-acoes"><button class="btn" data-act="fecharSheet">Manter</button><button class="btn perigo" data-act="descartarConfirmado">Descartar</button></div>`;
+}
+
+function erroCampo(id, msg) {
+  const e = document.getElementById(id + '-erro'), inp = document.getElementById(id);
+  if (e) { e.textContent = msg || ''; e.hidden = !msg; }
+  if (inp) inp.classList.toggle('invalido', !!msg);
+  return !msg;
+}
+
+function salvarCadastro() {
+  const sh = S.sheet;
+  const existente = sh.i !== undefined ? S.rd.equipe[sh.i] : null;
+  const val = id => (document.getElementById(id) ? document.getElementById(id).value.trim() : '');
+  let funcao = val('fFuncao'); if (funcao === '__outra') funcao = val('fFuncaoOutra');
+  const d = {
+    nome: existente && !existente.novo ? existente.nome : val('fNome'), funcao, inicio: existente && !existente.novo ? existente.inicio : val('fInicio'),
+    telefone: val('fTel'), documento: val('fDoc'), vinculo: sh.vinculo !== undefined ? sh.vinculo : (existente ? (existente.atualizacao && existente.atualizacao.vinculo) || existente.vinculo : ''),
+    empresa: val('fEmpresa'), alojado: sh.alojado !== undefined ? sh.alojado : (existente ? existente.alojado : null), alojamento: val('fAloj')
+  };
+  let ok = true;
+  if (!existente || existente.novo) {
+    ok = erroCampo('fNome', d.nome.split(/\s+/).length < 2 ? 'Informe nome e sobrenome.' : '') && ok;
+    ok = erroCampo('fInicio', !d.inicio ? 'Informe a data.' : (d.inicio > S.rd.data ? 'Não pode ser depois da data do diário.' : '')) && ok;
+  }
+  // cadastro novo: tudo obrigatório. Cadastro existente: confere só o que foi alterado.
+  const mudou = k => !existente || existente.novo || String(d[k] === undefined || d[k] === null ? '' : d[k]) !== String(existente[k] === undefined || existente[k] === null ? '' : existente[k]);
+  if (mudou('funcao')) ok = erroCampo('fFuncao', !d.funcao ? 'Escolha a função.' : '') && ok;
+  if (mudou('telefone')) ok = erroCampo('fTel', d.telefone.replace(/\D/g, '').length < 10 ? 'Telefone com DDD (10 ou 11 dígitos).' : '') && ok;
+  if (mudou('documento')) ok = erroCampo('fDoc', d.documento.replace(/\W/g, '').length < 5 ? 'Informe o CPF ou RG.' : '') && ok;
+  if (mudou('vinculo')) ok = erroCampo('fVinculo', !d.vinculo ? 'Escolha o vínculo.' : '') && ok;
+  if (mudou('alojado')) ok = erroCampo('fAlojado', d.alojado === null || d.alojado === undefined ? 'Informe se está alojado.' : '') && ok;
+  if (d.alojado && (mudou('alojado') || mudou('alojamento'))) ok = erroCampo('fAloj', !d.alojamento ? 'Informe o alojamento.' : '') && ok;
+  if (!ok) { const e = document.querySelector('.folha .erro:not([hidden])'); if (e) e.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
+  if (!d.alojado) d.alojamento = '';
+  if (!['Empreiteiro', 'Outro'].includes(d.vinculo)) d.empresa = '';
+  if (!existente) {
+    S.rd.equipe.push(Object.assign({ id: uuid(), novo: true, presente: true, motivoFalta: '' }, d));
+    S.rd.equipe.sort((a, b) => String(a.nome).localeCompare(String(b.nome)));
+    toast(`${d.nome.split(' ')[0]} cadastrado e marcado presente.`);
+  } else if (existente.novo) {
+    Object.assign(existente, d);
+  } else {
+    const mud = {};
+    ['funcao', 'telefone', 'documento', 'vinculo', 'empresa', 'alojado', 'alojamento'].forEach(k => {
+      if (String(d[k] === undefined ? '' : d[k]) !== String(existente[k] === undefined ? '' : existente[k])) mud[k] = d[k];
+    });
+    existente.atualizacao = Object.keys(mud).length ? mud : null;
+    toast(Object.keys(mud).length ? 'Cadastro atualizado.' : 'Nada mudou.');
+  }
+  S.rd.equipeConferida = true;
+  salvarRd(); fecharSheet(); render();
+}
+
+function salvarSaida() {
+  const sh = S.sheet;
+  const c = S.rd.equipe[sh.i];
+  const data = document.getElementById('fDataSaida').value;
+  const destino = document.getElementById('fDestino') ? document.getElementById('fDestino').value : '';
+  let ok = erroCampo('fMotivo', !sh.motivo ? 'Escolha o motivo.' : '');
+  ok = erroCampo('fDataSaida', !data ? 'Informe a data.' : '') && ok;
+  if (sh.motivo === 'transferencia') ok = erroCampo('fDestino', !destino ? 'Escolha a obra de destino.' : '') && ok;
+  if (!ok) return;
+  c.saida = { data, motivo: sh.motivo, obraDestino: sh.motivo === 'transferencia' ? destino : '', detalhe: document.getElementById('fDetalhe').value.trim() };
+  S.rd.equipeConferida = true;
+  salvarRd(); fecharSheet(); render();
+  toast(`Saída de ${c.nome.split(' ')[0]} registrada.`);
+}
+
+/* =====================================================================
+   EVENTOS
+   ===================================================================== */
+document.addEventListener('click', async ev => {
+  const el = ev.target.closest('[data-act]');
+  if (!el) { if (ev.target.id === 'sheet' && !(S.sheet && S.sheet.tipo === 'corte')) fecharSheet(); return; }
+  const a = el.dataset.act, i = el.dataset.i !== undefined ? Number(el.dataset.i) : null, v = el.dataset.v;
+  const rd = S.rd;
+  switch (a) {
+    case 'entrar': {
+      const txt = $('#inpLink').value.trim();
+      const m = txt.match(/[?&]t=([A-Za-z0-9_\-]+)/);
+      const tok = m ? m[1] : txt;
+      if (tok.length < 20) { S.msgAcesso = 'Esse não parece ser o link completo. Copie a mensagem inteira do escritório.'; render(); return; }
+      await salvarToken(tok); S.msgAcesso = ''; S.tela = 'inicio'; render();
+      await atualizarBoot(); sincronizar();
+      return;
+    }
+    case 'fila': S.tela = 'fila'; history.pushState({ tela: 'fila' }, ''); render(); window.scrollTo(0, 0); return;
+    case 'inicio': history.back(); return;
+    case 'atualizar': await atualizarBoot(); if (!S.online) toast('Sem conexão. Usando os dados guardados no celular.'); return;
+    case 'sincronizar': sincronizar(); return;
+    case 'abrir': abrirDiario(el.dataset.obra, el.dataset.data); return;
+    case 'outraData': abrirSheet('outraData', { obra: el.dataset.obra }); return;
+    case 'abrirOutraData': {
+      const d = $('#fOutraData').value;
+      const max = (S.boot && S.boot.config && S.boot.config.maxDiasAtras) || 45;
+      if (!d || d > hoje() || d < somaDias(hoje(), -max)) { erroCampo('fOutraData', `Escolha uma data entre ${br(somaDias(hoje(), -max))} e hoje.`); return; }
+      const obra = S.sheet.obra; S.sheet = null; renderSheet(); abrirDiario(obra, d, true); return;
+    }
+    case 'descartarItem': {
+      const it = S.fila.find(x => x.id === el.dataset.id);
+      if (it) { it.estado = 'descartado'; await salvarItem(it); for (const f of it.fotos) await DB.del('fotos', f.id); render(); }
+      return;
+    }
+    case 'sair': history.back(); return;
+    case 'passo': irPasso(Number(el.dataset.n)); return;
+    case 'proximo': if (S.passo === 1) rd.equipeConferida = true; irPasso(S.passo + 1); return;
+    case 'tempo': rd.clima[el.dataset.p].weather = v; rd.clima[el.dataset.p].checked = true; rd.clima[el.dataset.p].sugerido = false; salvarRd(); render(); return;
+    case 'condicao': rd.clima[el.dataset.p].status = v; rd.clima[el.dataset.p].checked = true; salvarRd(); render(); return;
+    case 'presenca': rd.equipe[i].presente = v === '1'; if (v === '0' && !rd.equipe[i].motivoFalta) rd.equipe[i].motivoFalta = 'Falta'; rd.equipeConferida = true; salvarRd(); render(); return;
+    case 'motivo': rd.equipe[i].motivoFalta = v; salvarRd(); render(); return;
+    case 'todosPresentes': rd.equipe.forEach(c => { c.presente = true; }); rd.equipeConferida = true; salvarRd(); render(); return;
+    case 'menuPessoa': abrirSheet('pessoa', { i }); return;
+    case 'abrirSaida': S.sheet = { tipo: 'saida', i }; renderSheet(); return;
+    case 'abrirEditar': S.sheet = { tipo: 'cadastro', i }; renderSheet(); return;
+    case 'removerPessoa': rd.equipe.splice(i, 1); salvarRd(); fecharSheet(); render(); return;
+    case 'desfazerSaida': delete rd.equipe[i].saida; salvarRd(); render(); return;
+    case 'novoColab': abrirSheet('cadastro', {}); return;
+    case 'trazer': abrirSheet('trazer', { q: '' }); return;
+    case 'selTrazer': S.sheet.sel = v; renderSheet(); return;
+    case 'salvarTrazer': {
+      const c = (S.boot.outrosColaboradores || []).find(x => x.id === S.sheet.sel);
+      const ini = $('#fInicioTrazer').value || rd.data;
+      if (ini > rd.data) { erroCampo('fInicioTrazer', 'Não pode ser depois da data do diário.'); return; }
+      rd.equipe.push({ id: c.id, nome: c.nome, funcao: c.funcao, inicio: ini, chegada: true, presente: true, motivoFalta: '' });
+      rd.equipe.sort((x, y) => String(x.nome).localeCompare(String(y.nome)));
+      rd.equipeConferida = true; salvarRd(); fecharSheet(); render(); toast(`${c.nome.split(' ')[0]} incluído na equipe.`);
+      return;
+    }
+    case 'selVinculo': S.sheet.vinculo = v; document.querySelectorAll('#fVinculo .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === v)); $('#boxEmpresa').hidden = !['Empreiteiro', 'Outro'].includes(v); return;
+    case 'selAlojado': S.sheet.alojado = v === '1'; document.querySelectorAll('#fAlojado .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === v)); $('#boxAloj').hidden = v !== '1'; return;
+    case 'salvarCadastro': salvarCadastro(); return;
+    case 'selMotivoSaida': {
+      S.sheet.motivo = v; S.sheet.data = $('#fDataSaida').value; S.sheet.detalhe = $('#fDetalhe').value;
+      S.sheet.destino = $('#fDestino') ? $('#fDestino').value : ''; renderSheet(); return;
+    }
+    case 'salvarSaida': salvarSaida(); return;
+    case 'pctMenos': case 'pctMais': {
+      const s = rd.servicos[i];
+      s.percentual = Math.max(0, Math.min(100, s.percentual + (a === 'pctMais' ? 5 : -5)));
+      if (s.percentual !== s.anterior) s.trabalhou = true;
+      salvarRd(); render(); return;
+    }
+    case 'novoServico': abrirSheet('servico'); return;
+    case 'salvarServico': {
+      const nome = $('#fServNome').value.trim();
+      const pct = Math.max(0, Math.min(100, Math.round(Number($('#fServPct').value.replace(',', '.')) || 0)));
+      if (!erroCampo('fServNome', nome.length < 3 ? 'Dê um nome ao serviço.' : '')) return;
+      rd.servicos.push({ id: uuid(), nome, anterior: 0, percentual: pct, obs: '', trabalhou: true, novo: true });
+      salvarRd(); fecharSheet(); render(); return;
+    }
+    case 'camera': $('#inpCamera').click(); return;
+    case 'galeria': $('#inpGaleria').click(); return;
+    case 'rmFoto': { const f = rd.fotos.splice(i, 1)[0]; await DB.del('fotos', f.id); liberarUrl(f.id); salvarRd(); render(); return; }
+    case 'atalho': {
+      const t = $('#txtOcorr');
+      const base = rd.ocorrencias.replace(/\s+$/, '');
+      rd.ocorrencias = (base ? base + '\n' : '') + v + ': ';
+      rd.semOcorrencias = false; salvarRd();
+      t.value = rd.ocorrencias; t.focus(); t.setSelectionRange(t.value.length, t.value.length);
+      const cb = document.querySelector('[data-bind="semOcorr"]'); if (cb) cb.checked = false;
+      return;
+    }
+    case 'enviar': {
+      const p = pendencias(rd);
+      if (p.bloq.length) { irPasso(p.bloq[0].passo); return; }
+      if (p.avisos.length) { abrirSheet('confirmar'); return; }
+      enviarDiario(); return;
+    }
+    case 'enviarConfirmado': fecharSheet(); enviarDiario(); return;
+    case 'descartar': abrirSheet('descartar'); return;
+    case 'descartarConfirmado': descartarRascunho(); return;
+    case 'fecharSheet': if (S.sheet && S.sheet.tipo === 'corte') { concluirCorte(false); return; } fecharSheet(); return;
+    case 'posCorte': S.sheet.pos = v; renderSheet(); return;
+    case 'corteUsar': concluirCorte(true); return;
+    case 'corteDescartar': concluirCorte(false); return;
+    case 'gpsDeNovo': GPS.erro = ''; pararGPS(); iniciarGPS(); atualizarGpsUI(); return;
+  }
+});
+
+document.addEventListener('input', ev => {
+  const el = ev.target, b = el.dataset && el.dataset.bind;
+  if (!b) return;
+  const rd = S.rd, i = el.dataset.i !== undefined ? Number(el.dataset.i) : null;
+  switch (b) {
+    case 'pct': {
+      const s = rd.servicos[i]; s.percentual = Number(el.value);
+      if (s.percentual !== s.anterior) s.trabalhou = true;
+      const out = document.getElementById('pct-' + i);
+      if (out) { out.innerHTML = s.percentual + '<small>%</small>'; out.classList.toggle('subiu', s.percentual > s.anterior); }
+      const cb = document.querySelector(`[data-bind="trabalhou"][data-i="${i}"]`); if (cb) cb.checked = s.trabalhou;
+      salvarRd(); return;
+    }
+    case 'obsServ': rd.servicos[i].obs = el.value; salvarRd(); return;
+    case 'legenda': rd.fotos[i].legenda = el.value; salvarRd(); return;
+    case 'ocorrencias': rd.ocorrencias = el.value; if (el.value.trim()) { rd.semOcorrencias = false; const cb = document.querySelector('[data-bind="semOcorr"]'); if (cb) cb.checked = false; } salvarRd(); return;
+    case 'busca': S.sheet.q = el.value; {
+      const pos = el.selectionStart; renderSheet(); const n = $('#fBusca'); if (n) { n.focus(); n.setSelectionRange(pos, pos); }
+    } return;
+  }
+});
+
+document.addEventListener('change', ev => {
+  const el = ev.target;
+  if (el.id === 'inpCamera' || el.id === 'inpGaleria') { const fs = [...el.files]; el.value = ''; processarArquivos(fs, el.id === 'inpCamera' ? 'camera' : 'galeria'); return; }
+  if (el.id === 'fFuncao') { const o = $('#fFuncaoOutra'); if (o) o.hidden = el.value !== '__outra'; return; }
+  const b = el.dataset && el.dataset.bind, rd = S.rd, i = el.dataset.i !== undefined ? Number(el.dataset.i) : null;
+  if (!b) return;
+  switch (b) {
+    case 'climaCheck': rd.clima[el.dataset.p].checked = el.checked; salvarRd(); render(); return;
+    case 'trabalhou': rd.servicos[i].trabalhou = el.checked; salvarRd(); return;
+    case 'fotoServ': rd.fotos[i].idServico = el.value; salvarRd(); return;
+    case 'semOcorr': rd.semOcorrencias = el.checked; salvarRd(); return;
+    case 'pct': render(); return;
+  }
+});
+
+window.addEventListener('popstate', () => {
+  if (S.ignorarPop) { S.ignorarPop = false; return; }
+  if (S.sheet) { fecharSheet(true); return; }
+  if (S.tela === 'diario') { salvarRd(true); pararGPS(); S.rd = null; S.tela = 'inicio'; render(); window.scrollTo(0, 0); return; }
+  if (S.tela === 'fila') { S.tela = 'inicio'; render(); return; }
+});
+
+/* ---------- avisos ---------- */
+let timerToast = null;
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.hidden = false;
+  clearTimeout(timerToast); timerToast = setTimeout(() => { t.hidden = true; }, 3800);
+}
+function ocupado(msg) {
+  let el = document.getElementById('ocupado');
+  if (!msg) { if (el) el.remove(); return; }
+  if (!el) { el = document.createElement('div'); el.id = 'ocupado'; el.className = 'ocupado'; document.body.appendChild(el); }
+  el.textContent = msg;
+}
+
+async function salvarToken(t) { S.token = t; await DB.put('kv', 'token', t); lsSet('rdo_token', t); }
+
+/* =====================================================================
+   DEMONSTRAÇÃO (API_URL = 'demo'): servidor simulado com dados de exemplo
+   ===================================================================== */
+const Demo = (() => {
+  let db = null;
+  const espera = ms => new Promise(r => setTimeout(r, ms));
+  function semente() {
+    const h = hoje();
+    const dias = [];
+    for (let i = 1, n = 0; n < 6 && i < 20; i++) { const d = somaDias(h, -i); if (diaSemana(d) <= 6) { dias.push(d); n++; } }
+    const pessoas = [
+      ['Luiz Henrique Santos', 'Mestre de obras', 'Rijo (CLT)', '', false], ['João Batista da Silva', 'Pedreiro', 'Rijo (CLT)', '', true],
+      ['José Carlos Ferreira', 'Pedreiro', 'Rijo (CLT)', '', true], ['Antônio Marcos Souza', 'Servente', 'Rijo (CLT)', '', true],
+      ['Francisco das Chagas Lima', 'Servente', 'Diarista', '', false], ['Raimundo Nonato Alves', 'Carpinteiro', 'Rijo (CLT)', '', true],
+      ['Paulo Roberto Gomes', 'Armador', 'Rijo (CLT)', '', false], ['Edson Pereira Costa', 'Eletricista', 'Empreiteiro', 'Elétrica Modelo (exemplo)', false]
+    ].map((p, k) => ({ id: 'c' + k, nome: p[0], funcao: p[1], telefone: '(81) 9 9' + (100 + k) + '-00' + (10 + k), documento: '000.000.0' + k + '0-00', vinculo: p[2], empresa: p[3], alojado: p[4], alojamento: p[4] ? 'Alojamento Rua das Flores (exemplo)' : '', inicio: somaDias(h, -40 + k * 3), obra: 'EX.01' }));
+    pessoas.push({ id: 'c20', nome: 'Severino Ramos Bezerra', funcao: 'Pedreiro', telefone: '(81) 9 9200-0020', documento: '000.000.020-00', vinculo: 'Rijo (CLT)', empresa: '', alojado: false, alojamento: '', inicio: somaDias(h, -60), obra: 'EX.02' });
+    pessoas.push({ id: 'c21', nome: 'Manoel Messias Rocha', funcao: 'Servente', telefone: '(81) 9 9200-0021', documento: '000.000.021-00', vinculo: 'Rijo (CLT)', empresa: '', alojado: false, alojamento: '', inicio: somaDias(h, -30), obra: 'EX.02' });
+    pessoas.push({ id: 'c22', nome: 'Cícero Romão Lins', funcao: 'Gesseiro', telefone: '(81) 9 9200-0022', documento: '000.000.022-00', vinculo: 'Diarista', empresa: '', alojado: false, alojamento: '', inicio: '', obra: '', desligado: true });
+    const servicos = [['Fundação · sapatas e baldrame', 100], ['Alvenaria do térreo', 45], ['Laje do térreo · forma e armação', 30], ['Instalações elétricas · tubulação', 20], ['Reboco interno', 0]]
+      .map((s, k) => ({ id: 's' + k, obra: 'EX.01', nome: s[0], percentual: s[1], status: s[1] >= 100 ? 'concluido' : 'ativo' }));
+    servicos.push({ id: 's10', obra: 'EX.02', nome: 'Estrutura metálica', percentual: 70, status: 'ativo' });
+    const diarios = [];
+    dias.forEach((d, k) => { if (k !== 1) diarios.push({ obra: 'EX.01', data: d, codigo: pad3(12 - k), status: 'enviado', origem: 'app', engenheiro: 'Eng. Marina Duarte (exemplo)' }); });
+    diarios.push({ obra: 'EX.02', data: dias[0], codigo: '031', status: 'enviado', origem: 'vobi' });
+    return { pessoas, servicos, diarios, recebidos: {} };
+  }
+  const pad3 = n => String(n).padStart(3, '0');
+  async function carregar() { if (!db) db = (await DB.get('kv', 'demo')) || semente(); return db; }
+  async function salvar() { await DB.put('kv', 'demo', db); }
+  function previsao() {
+    const out = {};
+    for (let i = -3; i <= 1; i++) out[somaDias(hoje(), i)] = { morning: { weather: 'clean', status: 'practicable', chuvaMm: 0 }, afternoon: { weather: 'rainy', status: 'practicable', chuvaMm: 3.4 }, night: { weather: 'cloudy', status: 'practicable', chuvaMm: 0.2 } };
+    return out;
+  }
+  async function chamar(acao, d) {
+    await espera(250);
+    if (S.forcarOffline) throw Object.assign(new Error('Sem conexão com a internet.'), { rede: true });
+    const b = await carregar();
+    if (acao === 'bootstrap') {
+      const obras = [['EX.01', 'EX.01 | Residencial Jardins (exemplo)'], ['EX.02', 'EX.02 | Galpão Logístico (exemplo)']].map(([cod, nome]) => ({
+        codigo: cod, nome, idVobi: 0, cidade: 'Recife - PE', envioVobi: false, previsao: previsao(),
+        latitude: cod === 'EX.01' ? -8.053920 : -8.110200, longitude: cod === 'EX.01' ? -34.880870 : -34.915000,
+        equipe: b.pessoas.filter(p => p.obra === cod && !p.desligado).map(p => Object.assign({}, p)),
+        servicos: b.servicos.filter(s => s.obra === cod).map(s => ({ id: s.id, nome: s.nome, percentual: s.percentual, status: s.status })),
+        diarios: b.diarios.filter(x => x.obra === cod).sort((x, y) => y.data.localeCompare(x.data))
+      }));
+      return {
+        ok: true, hoje: hoje(), geradoEm: new Date().toISOString(), engenheiro: { nome: 'Eng. Marina Duarte (exemplo)', email: '' }, obras,
+        obrasDestino: obras.map(o => ({ codigo: o.codigo, nome: o.nome })).concat([{ codigo: 'EX.03', nome: 'EX.03 | Reforma Clínica (exemplo)' }]),
+        outrosColaboradores: b.pessoas.filter(p => p.obra !== 'EX.01' || p.desligado).map(p => ({ id: p.id, nome: p.nome, funcao: p.funcao, obraAtual: p.obra, situacao: p.desligado ? 'desligado' : 'ativo' })),
+        funcoes: ['Mestre de obras', 'Encarregado', 'Pedreiro', 'Servente', 'Carpinteiro', 'Armador', 'Eletricista', 'Encanador', 'Pintor', 'Gesseiro'],
+        alojamentos: ['Alojamento Rua das Flores (exemplo)', 'Pousada do Canteiro (exemplo)'],
+        motivosFalta: ['Falta', 'Atestado médico', 'Folga', 'Férias', 'Chuva / sem frente de serviço', 'Outro'],
+        motivosSaida: [{ id: 'transferencia', nome: 'Transferido para outra obra' }, { id: 'fim_servico', nome: 'Fim do serviço (empreiteiro)' }, { id: 'demissao', nome: 'Demitido / fim de contrato' }, { id: 'pediu_demissao', nome: 'Pediu demissão' }, { id: 'abandono', nome: 'Abandono' }, { id: 'outro', nome: 'Outro' }],
+        vinculos: ['Rijo (CLT)', 'Empreiteiro', 'Diarista', 'Autônomo', 'Outro'],
+        config: { diasTrabalho: [1, 2, 3, 4, 5, 6], minFotos: 1, maxDiasAtras: 45, raioObraM: 1000 }
+      };
+    }
+    if (acao === 'enviarDiario') {
+      if (b.recebidos[d.id]) return { ok: true, status: b.recebidos[d.id].status, jaRecebido: true };
+      if (b.diarios.some(x => x.obra === d.obra && x.data === d.data)) return { ok: false, codigo: 'duplicado', erro: `Já existe diário de ${br(d.data)} nesta obra.` };
+      d.novos.forEach(n => b.pessoas.push(Object.assign({}, n, { obra: d.obra })));
+      d.chegadas.forEach(ch => { const p = b.pessoas.find(x => x.id === ch.id); if (p) { p.obra = d.obra; p.inicio = ch.inicio; p.desligado = false; } });
+      d.atualizacoes.forEach(a => { const p = b.pessoas.find(x => x.id === a.id); if (p) Object.assign(p, a); });
+      d.saidas.forEach(s => { const p = b.pessoas.find(x => x.id === s.id); if (p) { if (s.motivo === 'transferencia') { p.obra = s.obraDestino; p.inicio = s.data; } else { p.obra = ''; p.desligado = true; } } });
+      d.servicos.forEach(s => { const x = b.servicos.find(y => y.id === s.id); if (x) { x.percentual = s.percentual; x.status = s.percentual >= 100 ? 'concluido' : 'ativo'; } else b.servicos.push({ id: s.id, obra: d.obra, nome: s.nome, percentual: s.percentual, status: 'ativo' }); });
+      const ult = b.diarios.filter(x => x.obra === d.obra).map(x => Number(x.codigo)).reduce((m, x) => Math.max(m, x), 0);
+      const reg = { obra: d.obra, data: d.data, codigo: pad3(ult + 1), status: 'enviado', origem: 'app', engenheiro: 'Eng. Marina Duarte (exemplo)' };
+      b.diarios.push(reg);
+      b.recebidos[d.id] = { status: 'enviado', codigoVobi: reg.codigo, fotosEsperadas: d.fotos.length };
+      await salvar();
+      return { ok: true, status: d.fotos.length ? 'aguardando-fotos' : 'pronto', avisos: [], envioVobi: true };
+    }
+    if (acao === 'enviarFoto') { await espera(300); return { ok: true, status: 'pronto' }; }
+    if (acao === 'situacao') { const out = {}; (d.ids || []).forEach(id => { if (b.recebidos[id]) out[id] = b.recebidos[id]; }); return { ok: true, diarios: out }; }
+    return { ok: false, erro: 'Ação desconhecida' };
+  }
+  return { chamar };
+})();
+
+/* =====================================================================
+   INÍCIO
+   ===================================================================== */
+async function iniciar() {
+  const p = new URLSearchParams(location.search);
+  const t = p.get('t');
+  if (t && t.length >= 20) await salvarToken(t);
+  S.token = (await DB.get('kv', 'token')) || lsGet('rdo_token');
+  if (DEMO && !S.token) S.token = 'demo-token-engenheiro-exemplo-0001';
+  S.boot = (await DB.get('kv', 'boot')) || null;
+  S.ultimaSync = (await DB.get('kv', 'ultimaSync')) || null;
+  S.fila = (await DB.all('fila')) || [];
+  ((await DB.all('rascunhos')) || []).forEach(r => { S.rascunhos[r.obra + '|' + r.data] = true; });
+  history.replaceState({ tela: 'inicio' }, '');
+  if (!S.token) { S.tela = 'acesso'; render(); return; }
+  S.tela = 'inicio'; render();
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+  await atualizarBoot();
+  sincronizar();
+  setInterval(() => { if (!document.hidden) sincronizar(); }, 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) sincronizar(); });
+  window.addEventListener('online', () => { S.online = true; sincronizar(); });
+  window.addEventListener('offline', () => { S.online = false; renderBarra(); });
+}
+
+if (!DEMO && 'serviceWorker' in navigator && location.protocol === 'https:') {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+iniciar();
+</script>
+</body>
+</html>
