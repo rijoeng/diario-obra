@@ -1,5 +1,5 @@
 /* Diário de Obra Rijo · service worker: guarda o app no celular para abrir sem sinal. */
-const VERSAO = 'rdo-0.7.0';
+const VERSAO = 'rdo-0.7.1';
 const ARQUIVOS = ['./', './index.html', './config.js', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', e => {
